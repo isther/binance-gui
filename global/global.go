@@ -8,4 +8,8 @@ var (
 	Symbol = "BTCUSDT"
 	Levels = 20
 	Limit  = 500
+
+	Connected = false
+
+	FreshC = make(chan string)
 )

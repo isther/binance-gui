@@ -1,4 +1,5 @@
 .vscode
 release
+script
 config.yaml
 Makefile
