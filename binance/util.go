@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/adshao/go-binance/v2"
-	"github.com/isther/binance/conf"
+	"github.com/isther/binanceGui/conf"
 )
 
 func Status() {
@@ -17,13 +17,21 @@ func Status() {
 	fmt.Println(res)
 }
 
-func symbolExist(symbol string) bool {
+func SymbolExist(symbol string) bool {
 	_, err := binance.NewClient(conf.Conf.ApiKey, conf.Conf.SecretKey).NewExchangeInfoService().Symbol(symbol).Do(context.Background())
 	if err != nil {
 		return false
 	}
 
 	return true
+}
+
+func ExchangeInfo(symbol string) {
+	info, err := binance.NewClient(conf.Conf.ApiKey, conf.Conf.SecretKey).NewExchangeInfoService().Symbol(symbol).Do(context.Background())
+	if err != nil {
+		panic(info)
+	}
+	fmt.Println(info.Symbols[0].Filters)
 }
 
 func priceFloat648Point(f float64) string {
