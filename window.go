@@ -25,6 +25,7 @@ func mainWindow() {
 					giu.MenuItem("Proxy").OnClick(func() {}),
 				),
 			),
+			giu.PrepareMsgbox(),
 			giu.SplitLayout(giu.DirectionHorizontal, 200, //H
 				giu.Label("parameterSettings"),
 				giu.SplitLayout(giu.DirectionHorizontal, 200, //H
@@ -38,7 +39,12 @@ func mainWindow() {
 								if global.Symbol == symbol {
 									return
 								}
-								global.FreshC <- symbol
+								if binance.SymbolExist(symbol) {
+									global.FreshC <- symbol
+									giu.Msgbox("Info", "Ok")
+								} else {
+									giu.Msgbox("Error", "No trading pair")
+								}
 							}),
 						),
 					),
@@ -54,7 +60,7 @@ func mainWindow() {
 							),
 							giu.SplitLayout(giu.DirectionHorizontal, 350, //H
 								giu.Row(
-									giu.Table().Freeze(0, 1).FastMode(true).Size(350, 960).Rows(binance.BuildWsPartialDepthServeRows()...),
+									giu.Table().Freeze(0, 1).FastMode(true).Size(350, 960).Rows(binance.GetWsPartialDepthTable()...),
 								),
 								giu.Label("order1"),
 							),
