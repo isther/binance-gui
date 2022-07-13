@@ -1,14 +1,12 @@
 package binance
 
 import (
+	"context"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"time"
 
 	libBinance "github.com/adshao/go-binance/v2"
-	"github.com/isther/binance/conf"
-	"github.com/tidwall/gjson"
+	"github.com/isther/binanceGui/conf"
 )
 
 var (
@@ -16,36 +14,40 @@ var (
 )
 
 func GetClient() *libBinance.Client {
-	client := libBinance.NewClient(conf.Conf.ApiKey, conf.Conf.SecretKey)
-	return client
+	return libBinance.NewClient(conf.Conf.ApiKey, conf.Conf.SecretKey)
 }
 
-func SystemTime() int64 {
-	client := http.Client{}
-	req, err := http.NewRequest(http.MethodGet, "https://api.binance.com/api/v3/time", nil)
+func GetSystemTime() {
+	timestamp, err := GetClient().NewServerTimeService().Do(context.Background())
 	if err != nil {
 		panic(err)
 	}
-	res, err := client.Do(req)
-	if err != nil {
-		panic(err)
-	}
-	defer res.Body.Close()
-
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		panic(err)
-	}
-	timestamp := gjson.Get(string(body), "serverTime").Int()
 	fmt.Println(timestamp)
-	return timestamp - currentTimestamp()
 }
 
-func currentTimestamp() int64 {
-	return formatTimestamp(time.Now())
+func GetAll() {
+	info, err := GetClient().NewGetAllCoinsInfoService().Do(context.Background())
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(info[0])
 }
 
-// FormatTimestamp formats a time into Unix timestamp in milliseconds, as requested by Binance.
-func formatTimestamp(t time.Time) int64 {
-	return t.UnixNano() / int64(time.Millisecond)
+func GetApiPermission() {
+	res, err := GetClient().NewGetAPIKeyPermission().Do(context.Background())
+
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("ipRestrict: ", res.IPRestrict)
+	fmt.Println("createTime: ", res.CreateTime)
+	fmt.Println("enableWithDrawals: ", res.EnableWithdrawals)
+	fmt.Println("enableInternalTransfer: ", res.EnableInternalTransfer)
+	fmt.Println("permitsUniversalTransfer: ", res.PermitsUniversalTransfer)
+	fmt.Println("enableVanillaOptions: ", res.EnableVanillaOptions)
+	fmt.Println("enableReading: ", res.EnableReading)
+	fmt.Println("enableFutures: ", res.EnableFutures)
+	fmt.Println("enableMargin: ", res.EnableMargin)
+	fmt.Println("enableSpotAndMarginTrading: ", res.EnableSpotAndMarginTrading)
+	fmt.Println("tradingAuthorityExpirationTime: ", res.TradingAuthorityExpirationTime)
 }

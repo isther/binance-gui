@@ -1,11 +1,10 @@
-module github.com/isther/binance
+module github.com/isther/binanceGui
 
 go 1.18
 
 require (
 	github.com/AllenDang/giu v0.6.2
 	github.com/adshao/go-binance/v2 v2.3.6
-	github.com/tidwall/gjson v1.14.1
 	gopkg.in/yaml.v2 v2.4.0
 )
 
@@ -24,8 +23,6 @@ require (
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8 // indirect
 	github.com/sahilm/fuzzy v0.1.0 // indirect
 	github.com/stretchr/testify v1.7.2 // indirect
-	github.com/tidwall/match v1.1.1 // indirect
-	github.com/tidwall/pretty v1.2.0 // indirect
 	golang.org/x/image v0.0.0-20220617043117-41969df76e82 // indirect
 	golang.org/x/sys v0.0.0-20220708085239-5a0f0661e09d // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
