@@ -10,17 +10,14 @@ import (
 var (
 	Conf *Config
 
-	configFilePath = "./config.yaml"
+	configFilePath = "./config.yml"
 )
 
 type Config struct {
+	Pprof     bool   `yaml:"pprof"`
 	Proxy     string `yaml:"proxy"`
 	ApiKey    string `yaml:"apiKey"`
 	SecretKey string `yaml:"secretKey"`
-	HotKey    struct {
-		Buy  []string `yaml:"buy"`
-		Sale []string `yaml:"sale"`
-	} `yaml:"hotkey"`
 }
 
 func init() {
@@ -29,7 +26,7 @@ func init() {
 	)
 	Conf = new(Config)
 
-	yamlFileBytes, err := ioutil.ReadFile("./config.yml")
+	yamlFileBytes, err := ioutil.ReadFile(configFilePath)
 	if err != nil {
 		log.Fatalln(err)
 	}
