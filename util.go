@@ -2,21 +2,29 @@ package main
 
 import (
 	"context"
+	"log"
+	"net/http"
 	"os"
 	"time"
 
 	"github.com/AllenDang/giu"
 	"github.com/isther/binance/binance"
-	"github.com/isther/binance/global"
+
+	_ "net/http/pprof"
 )
 
 func startTipWindow() {
+	var (
+		connected  = false
+		pingDoneCh = make(chan struct{})
+	)
+
 	startWindow := giu.NewMasterWindow("Network Testing...", 500, 100, 0)
 
 	go func() {
-		<-testDoneCh
+		<-pingDoneCh
 		startWindow.Close()
-		if !global.Connected {
+		if !connected {
 			os.Exit(0)
 		}
 	}()
@@ -27,13 +35,14 @@ func startTipWindow() {
 
 		err := binance.GetClient().NewPingService().Do(timeOutContext)
 		if err != nil {
-			global.Connected = false
+			connected = false
 			panic(err)
 		}
 
-		global.Connected = true
-		testDoneCh <- struct{}{}
+		connected = true
+		pingDoneCh <- struct{}{}
 	}()
+
 	startWindow.Run(tipWindow)
 }
 
@@ -43,4 +52,9 @@ func ticker() {
 		<-ticker.C
 		giu.Update()
 	}
+}
+func pprof() {
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
 }
