@@ -6,12 +6,14 @@ import (
 
 	"github.com/AllenDang/giu"
 	libBinance "github.com/adshao/go-binance/v2"
+	"github.com/isther/binanceGui/console"
 	"github.com/isther/binanceGui/global"
 	"github.com/isther/binanceGui/hotkey"
 )
 
 var (
 	globalWsPartialDepthServer = make(chan *libBinance.WsPartialDepthEvent)
+	depthTable                 *libBinance.WsPartialDepthEvent
 	wsPartialDepthTable        []*giu.TableRowWidget
 )
 
@@ -38,8 +40,9 @@ func StartWsPartialDepthServer() {
 			stopC <- struct{}{}
 			<-doneC
 
-			global.Symbol = symbol
+			AccountInstance.Symbol = symbol
 			doneC, stopC = runOneWsPartialDepth()
+			AccountInstance.ExchangeInfo()
 		}
 	}
 }
@@ -52,6 +55,7 @@ func runOneWsPartialDepth() (chan struct{}, chan struct{}) {
 	)
 
 	wsDepthHandler := func(event *libBinance.WsPartialDepthEvent) {
+		depthTable = event
 		globalWsPartialDepthServer <- event
 	}
 
@@ -59,7 +63,7 @@ func runOneWsPartialDepth() (chan struct{}, chan struct{}) {
 		fmt.Println(err)
 	}
 
-	doneC, stopC, err = libBinance.WsPartialDepthServe100Ms(global.Symbol, fmt.Sprintf("%d", global.Levels), wsDepthHandler, errHandler)
+	doneC, stopC, err = libBinance.WsPartialDepthServe100Ms(AccountInstance.Symbol, fmt.Sprintf("%d", global.Levels), wsDepthHandler, errHandler)
 
 	if err != nil {
 		fmt.Println(err)
@@ -95,7 +99,7 @@ func buildWsPartialDepthTable() []*giu.TableRowWidget {
 	for i := range eventNew.Asks {
 		price, quantity, err := eventNew.Asks[i].Parse()
 		if err != nil {
-			panic(err)
+			console.ConsoleInstance.Write(fmt.Sprintf("Error: %v", err))
 		}
 		rows[length-i-1] = giu.TableRow(
 			giu.Style().
@@ -118,7 +122,7 @@ func buildWsPartialDepthTable() []*giu.TableRowWidget {
 
 		price, quantity, err = eventNew.Bids[i].Parse()
 		if err != nil {
-			panic(err)
+			console.ConsoleInstance.Write(fmt.Sprintf("Error: %v", err))
 		}
 		rows[length+i+1] = giu.TableRow(
 			giu.Style().
