@@ -7,8 +7,6 @@ import (
 )
 
 func init() {
-	//order
-	// libBinance.UseTestnet = true
 
 	// websocket
 	libBinance.WebsocketKeepalive = true
