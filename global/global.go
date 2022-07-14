@@ -1,22 +1,50 @@
 package global
 
-import "time"
-
 var (
-	Ticker = time.NewTicker(time.Millisecond * 100)
+	Ping string
 
-	Symbol        = "BUSDUSDT"
-	Symbol1       = "BUSD"
-	Symbol1Free   string
-	Symbol1Locked string
-	Symbol2       = "USDT"
-	Symbol2Free   string
-	Symbol2Locked string
+	Average              int32 = 10
+	AverageSymbol1Amount float64
+	AverageSymbol2Amount float64
+
+	FreshC = make(chan string)
+
+	TradeMode TransactionMode = AllPlusOneSize
 
 	Levels = 20
 	Limit  = 500
 
-	FreshC = make(chan string)
+	HotKeyRun = false
 
 	Order2FontSize float32 = 16
 )
+
+type TransactionMode int
+
+const (
+	_ = iota
+	AllPlusOneSize
+	FiveAfterMulPoint
+)
+
+func GetHotKeyStatus() string {
+	if HotKeyRun {
+		return "开启"
+	}
+	return "关闭"
+}
+
+func GetTradeMode() string {
+	if TradeMode == AllPlusOneSize {
+		return "模式一"
+	}
+	return "模式二"
+}
+
+func ReverseTradeMode() {
+	if TradeMode == AllPlusOneSize {
+		TradeMode = FiveAfterMulPoint
+		return
+	}
+	TradeMode = AllPlusOneSize
+}
