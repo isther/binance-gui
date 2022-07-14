@@ -2,13 +2,16 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/AllenDang/giu"
 	"github.com/isther/binanceGui/binance"
+	"github.com/isther/binanceGui/global"
 
 	_ "net/http/pprof"
 )
@@ -23,10 +26,12 @@ func startTipWindow() {
 
 	go func() {
 		<-pingDoneCh
-		startWindow.Close()
 		if !connected {
-			os.Exit(0)
+			giu.Msgbox("Error", "网络连接失败，请重试！").Buttons(giu.MsgboxButtonsOk)
+			time.Sleep(5 * time.Second)
+			os.Exit(-1)
 		}
+		startWindow.Close()
 	}()
 
 	go func() {
@@ -36,75 +41,124 @@ func startTipWindow() {
 		err := binance.GetClient().NewPingService().Do(timeOutContext)
 		if err != nil {
 			connected = false
-			panic(err)
+		} else {
+			connected = true
 		}
 
-		connected = true
 		pingDoneCh <- struct{}{}
 	}()
 
 	startWindow.Run(tipWindow)
 }
 
-func ticker() {
+func giuUpdateTicker() {
 	ticker := time.NewTicker(100 * time.Millisecond)
 	for {
 		<-ticker.C
 		giu.Update()
+		binance.UpdateAverageAmount()
 	}
 }
 
-func regAllUsedKey(mod giu.Modifier) []giu.WindowShortcut {
+func regAllUsedKey(mode giu.Modifier) []giu.WindowShortcut {
 	return []giu.WindowShortcut{
 		// Sale
-		{Key: giu.KeyA, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "A").Trade() }},
-		{Key: giu.KeyS, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "S").Trade() }},
-		{Key: giu.KeyD, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "D").Trade() }},
-		{Key: giu.KeyF, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "F").Trade() }},
-		{Key: giu.KeyG, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "G").Trade() }},
-		{Key: giu.KeyH, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "H").Trade() }},
-		{Key: giu.KeyJ, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "J").Trade() }},
-		{Key: giu.KeyK, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "K").Trade() }},
-		{Key: giu.KeyL, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "L").Trade() }},
-		{Key: giu.KeySemicolon, Modifier: mod, Callback: func() { go binance.NewTrader(mod, ";").Trade() }},
-		{Key: giu.KeyZ, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "Z").Trade() }},
-		{Key: giu.KeyX, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "X").Trade() }},
-		{Key: giu.KeyC, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "C").Trade() }},
-		{Key: giu.KeyV, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "V").Trade() }},
-		{Key: giu.KeyB, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "B").Trade() }},
-		{Key: giu.KeyN, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "N").Trade() }},
-		{Key: giu.KeyM, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "M").Trade() }},
-		{Key: giu.KeyComma, Modifier: mod, Callback: func() { go binance.NewTrader(mod, ",").Trade() }},
-		{Key: giu.KeyPeriod, Modifier: mod, Callback: func() { go binance.NewTrader(mod, ".").Trade() }},
-		{Key: giu.KeySlash, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "/").Trade() }},
+		{Key: giu.KeyA, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "A") }},
+		{Key: giu.KeyS, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "S") }},
+		{Key: giu.KeyD, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "D") }},
+		{Key: giu.KeyF, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "F") }},
+		{Key: giu.KeyG, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "G") }},
+		{Key: giu.KeyH, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "H") }},
+		{Key: giu.KeyJ, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "J") }},
+		{Key: giu.KeyK, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "K") }},
+		{Key: giu.KeyL, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "L") }},
+		{Key: giu.KeySemicolon, Modifier: mode, Callback: func() { hotKeyCallBack(mode, ";") }},
+		{Key: giu.KeyZ, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "Z") }},
+		{Key: giu.KeyX, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "X") }},
+		{Key: giu.KeyC, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "C") }},
+		{Key: giu.KeyV, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "V") }},
+		{Key: giu.KeyB, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "B") }},
+		{Key: giu.KeyN, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "N") }},
+		{Key: giu.KeyM, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "M") }},
+		{Key: giu.KeyComma, Modifier: mode, Callback: func() { hotKeyCallBack(mode, ",") }},
+		{Key: giu.KeyPeriod, Modifier: mode, Callback: func() { hotKeyCallBack(mode, ".") }},
+		{Key: giu.KeySlash, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "/") }},
 
 		// Buy
-		{Key: giu.Key1, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "1").Trade() }},
-		{Key: giu.Key2, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "2").Trade() }},
-		{Key: giu.Key3, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "3").Trade() }},
-		{Key: giu.Key4, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "4").Trade() }},
-		{Key: giu.Key5, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "5").Trade() }},
-		{Key: giu.Key6, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "6").Trade() }},
-		{Key: giu.Key7, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "7").Trade() }},
-		{Key: giu.Key8, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "8").Trade() }},
-		{Key: giu.Key9, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "9").Trade() }},
-		{Key: giu.Key0, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "0").Trade() }},
-		{Key: giu.KeyQ, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "Q").Trade() }},
-		{Key: giu.KeyW, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "W").Trade() }},
-		{Key: giu.KeyE, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "E").Trade() }},
-		{Key: giu.KeyR, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "R").Trade() }},
-		{Key: giu.KeyT, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "T").Trade() }},
-		{Key: giu.KeyY, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "Y").Trade() }},
-		{Key: giu.KeyU, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "U").Trade() }},
-		{Key: giu.KeyI, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "I").Trade() }},
-		{Key: giu.KeyO, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "O").Trade() }},
-		{Key: giu.KeyP, Modifier: mod, Callback: func() { go binance.NewTrader(mod, "P").Trade() }},
+		{Key: giu.Key1, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "1") }},
+		{Key: giu.Key2, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "2") }},
+		{Key: giu.Key3, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "3") }},
+		{Key: giu.Key4, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "4") }},
+		{Key: giu.Key5, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "5") }},
+		{Key: giu.Key6, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "6") }},
+		{Key: giu.Key7, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "7") }},
+		{Key: giu.Key8, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "8") }},
+		{Key: giu.Key9, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "9") }},
+		{Key: giu.Key0, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "0") }},
+		{Key: giu.KeyQ, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "Q") }},
+		{Key: giu.KeyW, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "W") }},
+		{Key: giu.KeyE, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "E") }},
+		{Key: giu.KeyR, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "R") }},
+		{Key: giu.KeyT, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "T") }},
+		{Key: giu.KeyY, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "Y") }},
+		{Key: giu.KeyU, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "U") }},
+		{Key: giu.KeyI, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "I") }},
+		{Key: giu.KeyO, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "O") }},
+		{Key: giu.KeyP, Modifier: mode, Callback: func() { hotKeyCallBack(mode, "P") }},
 	}
 }
 
+func hotKeyCallBack(modee giu.Modifier, key string) {
+	if global.HotKeyRun {
+		go binance.NewTrader(modee, key).Trade()
+	}
+}
 
 func pprof() {
 	go func() {
 		log.Println(http.ListenAndServe("localhost:6060", nil))
 	}()
+}
+
+func ping() {
+	ticker := time.NewTicker(10 * time.Second)
+	for {
+		timeOutContext, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		start := time.Now()
+		err := binance.GetClient().NewPingService().Do(timeOutContext)
+		end := time.Now()
+		if err != nil {
+			global.Ping = "999ms"
+		}
+		global.Ping = fmt.Sprintf("%vms", end.Sub(start))
+		<-ticker.C
+	}
+}
+
+func freshSymbol() {
+	symbol1 = strings.ToUpper(symbol1)
+	symbol2 = strings.ToUpper(symbol2)
+
+	symbolNew1 := symbol1 + symbol2
+	symbolNew2 := symbol2 + symbol1
+	if symbolNew1 == binance.AccountInstance.One.Asset || symbolNew2 == binance.AccountInstance.One.Asset {
+		return
+	}
+
+	if binance.SymbolExist(symbolNew1) {
+		symbol = symbolNew1
+		global.FreshC <- symbol
+		binance.AccountInstance.One.Asset = symbol1
+		binance.AccountInstance.Two.Asset = symbol2
+	} else if binance.SymbolExist(symbolNew2) {
+		symbol = symbolNew2
+		global.FreshC <- symbol
+		binance.AccountInstance.One.Asset = symbol2
+		binance.AccountInstance.Two.Asset = symbol1
+	} else {
+		giu.Msgbox("Error", "不存在的交易对")
+	}
+
 }
