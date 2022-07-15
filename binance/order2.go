@@ -2,7 +2,6 @@ package binance
 
 import (
 	"fmt"
-	"image/color"
 
 	"github.com/AllenDang/giu"
 	libBinance "github.com/adshao/go-binance/v2"
@@ -14,37 +13,22 @@ import (
 var (
 	globalWsPartialDepthServer = make(chan *libBinance.WsPartialDepthEvent)
 	depthTable                 *libBinance.WsPartialDepthEvent
-	wsPartialDepthTable        []*giu.TableRowWidget
+
+	wsPartialDepthTable []*giu.TableRowWidget
 )
 
-func GetWsPartialDepthTable() []*giu.TableRowWidget {
-	return wsPartialDepthTable
+func GetWsPartialDepthBuyTable() []*giu.TableRowWidget {
+	if wsPartialDepthTable == nil {
+		return wsPartialDepthTable
+	}
+	return wsPartialDepthTable[0:21]
 }
 
-func StartWsPartialDepthServer() {
-	var (
-		doneC chan struct{}
-		stopC chan struct{}
-	)
-
-	go func() {
-		for {
-			wsPartialDepthTable = buildWsPartialDepthTable()
-		}
-	}()
-
-	doneC, stopC = runOneWsPartialDepth()
-	for {
-		select {
-		case symbol := <-global.FreshC:
-			stopC <- struct{}{}
-			<-doneC
-
-			AccountInstance.Symbol = symbol
-			doneC, stopC = runOneWsPartialDepth()
-			AccountInstance.ExchangeInfo()
-		}
+func GetWsPartialDepthSaleTable() []*giu.TableRowWidget {
+	if wsPartialDepthTable == nil {
+		return wsPartialDepthTable
 	}
+	return wsPartialDepthTable[21:]
 }
 
 func runOneWsPartialDepth() (chan struct{}, chan struct{}) {
@@ -84,13 +68,13 @@ func buildWsPartialDepthTable() []*giu.TableRowWidget {
 		giu.Label("快捷键"),
 		giu.Label("价格"),
 		giu.Label("成交额"),
-	).BgColor(&(color.RGBA{0x33, 0x33, 0xff, 0xff}))
+	).BgColor(global.PURPLE)
 
 	rows[21] = giu.TableRow(
 		giu.Label("快捷键"),
 		giu.Label("价格"),
 		giu.Label("成交额"),
-	).BgColor(&(color.RGBA{0x33, 0x33, 0xff, 0xff}))
+	).BgColor(global.PURPLE)
 
 	if eventNew == nil {
 		return rows
@@ -110,11 +94,11 @@ func buildWsPartialDepthTable() []*giu.TableRowWidget {
 			giu.Style().
 				SetFontSize(global.Order2FontSize).
 				To(
-					giu.Label(priceFloat648Point(price)),
+					giu.Label(priceFloat648Point(fmt.Sprintf("%.8f", price))),
 				),
 			giu.Style().
 				SetFontSize(global.Order2FontSize).
-				SetColor(giu.StyleColorText, color.RGBA{0xff, 0x33, 0x00, 0xff}).
+				SetColor(giu.StyleColorText, global.RED).
 				To(
 					giu.Label(fmt.Sprintf("%.2fK", price*quantity/1000)),
 				),
@@ -133,11 +117,11 @@ func buildWsPartialDepthTable() []*giu.TableRowWidget {
 			giu.Style().
 				SetFontSize(global.Order2FontSize).
 				To(
-					giu.Label(priceFloat648Point(price)),
+					giu.Label(priceFloat648Point(fmt.Sprintf("%.8f", price))),
 				),
 			giu.Style().
 				SetFontSize(global.Order2FontSize).
-				SetColor(giu.StyleColorText, color.RGBA{0x66, 0xcc, 0x00, 0xff}).
+				SetColor(giu.StyleColorText, global.GREEN).
 				To(
 					giu.Label(fmt.Sprintf("%.2fK", price*quantity/1000)),
 				),
