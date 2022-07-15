@@ -29,8 +29,7 @@ func SymbolExist(symbol string) bool {
 	return true
 }
 
-func priceFloat648Point(f float64) string {
-	s := fmt.Sprintf("%.8f", f)
+func priceFloat648Point(s string) string {
 	for i := len(s) - 1; i > 0; i-- {
 		if s[i] == '.' {
 			return string(append([]byte(s[:]), '0'))
