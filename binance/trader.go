@@ -16,7 +16,7 @@ import (
 	libBinance "github.com/adshao/go-binance/v2"
 )
 
-var Orders = make(map[byte][]string)
+// var Orders = make(map[byte][]string)
 
 type Trader struct {
 	mode          giu.Modifier
@@ -218,7 +218,7 @@ func (t *Trader) createOrderOnSubWarehouse() {
 }
 
 func (t *Trader) createOrder(price, quantity string) {
-	order, err := GetClient().NewCreateOrderService().Symbol(AccountInstance.Symbol).
+	_, err := GetClient().NewCreateOrderService().Symbol(AccountInstance.Symbol).
 		Side(t.sideType).Type(libBinance.OrderTypeLimit).
 		TimeInForce(libBinance.TimeInForceTypeGTC).Quantity(quantity).
 		Price(price).NewClientOrderID(t.clientOrderID).Do(context.Background())
@@ -226,27 +226,18 @@ func (t *Trader) createOrder(price, quantity string) {
 		console.ConsoleInstance.Write(fmt.Sprintf("Error: %v price: %v quantity: %v", err, price, quantity))
 		return
 	}
-
-	console.ConsoleInstance.Write(fmt.Sprintf("[CREATE] OK: ID: %s price: %s quantity: %s",
-		order.ClientOrderID,
-		price,
-		quantity,
-	))
-
-	Orders[t.key] = append(Orders[t.key], t.clientOrderID)
 }
 
 func (t *Trader) cancelOrder() {
-	if len(Orders[t.key]) == 0 {
+	orders := OpenOrdersInstance.GetOrders(t.key)
+	if len(orders) == 0 {
 		console.ConsoleInstance.Write("No order")
 		return
 	}
 
-	for i := range Orders[t.key] {
-		go t.cancelAOrder(Orders[t.key][i])
+	for i := range orders {
+		go t.cancelAOrder(orders[i].ClientOrderID)
 	}
-
-	Orders[t.key] = []string{}
 }
 
 func (t *Trader) cancelAOrder(clientOrderID string) {
@@ -257,7 +248,6 @@ func (t *Trader) cancelAOrder(clientOrderID string) {
 		console.ConsoleInstance.Write(fmt.Sprintf("Error: %v", err))
 		return
 	}
-	console.ConsoleInstance.Write(fmt.Sprintf("[CANCEL] OK, key: %v id: %v", t.key, clientOrderID))
 }
 
 func (t *Trader) pricePlusTickSize(price float64) float64 {

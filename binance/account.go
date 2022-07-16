@@ -205,15 +205,20 @@ func (account *Account) parseOrderUpdate(orderUpdate libBinance.WsOrderUpdate) {
 	}
 
 	if orderUpdate.Status == "NEW" {
-		console.ConsoleInstance.Write(fmt.Sprintf("Create Order, OrderID: %v", orderUpdate.ClientOrderId))
+		console.ConsoleInstance.Write(fmt.Sprintf("[CREATE] OK: ID: %s price: %s quantity: %s",
+			orderUpdate.ClientOrderId,
+			orderUpdate.Price,
+			orderUpdate.Volume,
+		))
 		OpenOrdersInstance.AddOrders(&libBinance.Order{
 			ClientOrderID: orderUpdate.ClientOrderId,
 			Side:          libBinance.SideType(orderUpdate.Side),
 			Price:         orderUpdate.Price,
 			OrigQuantity:  orderUpdate.Volume,
 		})
+
 	} else if orderUpdate.Status == "CANCELED" {
-		console.ConsoleInstance.Write(fmt.Sprintf("Cancel Order, OrderID: %v", orderUpdate.OrigCustomOrderId))
+		console.ConsoleInstance.Write(fmt.Sprintf("[CANCEL] OK, id: %v", orderUpdate.OrigCustomOrderId))
 		OpenOrdersInstance.CancelOrders(&libBinance.Order{
 			Side:          libBinance.SideType(orderUpdate.Side),
 			ClientOrderID: orderUpdate.OrigCustomOrderId,
