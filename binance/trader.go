@@ -204,11 +204,11 @@ func (t *Trader) createOrderOnSubWarehouse() {
 		//}}}
 
 		// {{{ Check Balance: 检查余额是否充足
-		quantityAll, _ := strconv.ParseFloat(AccountInstance.One.Free, 64)
-		if !float64CompareSmallerOrEqual(quantity, quantityAll, AccountInstance.LotSizeFilter.stepSize) {
-			console.ConsoleInstance.Write(fmt.Sprintf("余额不足, 持仓数量: %v下单数量: %v", quantityAll, quantity))
-			return
-		}
+		// quantityAll, _ := strconv.ParseFloat(AccountInstance.One.Free, 64)
+		// if !float64CompareSmallerOrEqual(quantity, quantityAll, AccountInstance.LotSizeFilter.stepSize) {
+		// 	console.ConsoleInstance.Write(fmt.Sprintf("余额不足, 持仓数量: %v下单数量: %v", quantityAll, quantity))
+		// 	return
+		// }
 		//}}}
 
 		console.ConsoleInstance.Write(fmt.Sprintf("分仓卖出"))

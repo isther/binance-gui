@@ -89,7 +89,7 @@ func init() {
 	VolatilityRatiosF2 = 1.005
 	VolatilityRatiosF5 = 0.995
 	VolatilityRatiosF6 = 0.995
-	VolatilityRatiosF12 = 1
+	VolatilityRatiosF12 = 0.98
 }
 
 func GetHotKeyStatus() string {

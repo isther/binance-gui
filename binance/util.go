@@ -53,10 +53,10 @@ func UpdateAverageAmount() {
 	console.ConsoleInstance.Write("分仓中...")
 	for {
 		if aggTradePrice, _ := strconv.ParseFloat(AggTradePrice, 64); !reflect.DeepEqual(aggTradePrice, 0.0) {
-			averageSymbol1AmountStr := correction(fmt.Sprintf("%f", (0.97*free/float64(global.Average))/aggTradePrice), AccountInstance.LotSizeFilter.stepSize)
+			averageSymbol1AmountStr := correction(fmt.Sprintf("%.8f", (0.97*free/float64(global.Average))/aggTradePrice), AccountInstance.LotSizeFilter.stepSize)
 			global.AverageSymbol1Amount, _ = strconv.ParseFloat(averageSymbol1AmountStr, 64)
 
-			averageSymbol2AmountStr := correction(fmt.Sprintf("%f", 0.97*free/float64(global.Average)), AccountInstance.PriceFilter.tickSize)
+			averageSymbol2AmountStr := correction(fmt.Sprintf("%.8f", 0.97*free/float64(global.Average)), AccountInstance.PriceFilter.tickSize)
 			global.AverageSymbol2Amount, _ = strconv.ParseFloat(averageSymbol2AmountStr, 64)
 			console.ConsoleInstance.Write(fmt.Sprintf("已分仓, 单仓购买数量: %v", global.AverageSymbol1Amount))
 			return
