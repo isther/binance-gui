@@ -15,10 +15,14 @@ var (
 	FreshC = make(chan string)
 
 	// 交易模式参数
-	TradeMode              TransactionMode = AllPlusOneSize
-	VolatilityRatiosBuy    [20]float32
-	VolatilityRatiosSale   [20]float32
-	VolatilityRatiosGlobal [5]float32
+	TradeMode            TransactionMode = AllPlusOneSize
+	VolatilityRatiosBuy  [20]float32
+	VolatilityRatiosSale [20]float32
+	VolatilityRatiosF1   float32
+	VolatilityRatiosF2   float32
+	VolatilityRatiosF5   float32
+	VolatilityRatiosF6   float32
+	VolatilityRatiosF12  float32
 
 	// ws参数
 	Levels = 20
@@ -80,6 +84,12 @@ func init() {
 	VolatilityRatiosBuy[17] = 0.93
 	VolatilityRatiosBuy[18] = 0.92
 	VolatilityRatiosBuy[19] = 0.91
+
+	VolatilityRatiosF1 = 1.005
+	VolatilityRatiosF2 = 1.005
+	VolatilityRatiosF5 = 0.995
+	VolatilityRatiosF6 = 0.995
+	VolatilityRatiosF12 = 1
 }
 
 func GetHotKeyStatus() string {

@@ -113,6 +113,23 @@ func mainWindow() {
 											giu.InputFloat(&global.VolatilityRatiosBuy[18]).Size(volatilityRatiosInputSize),
 											giu.InputFloat(&global.VolatilityRatiosBuy[19]).Size(volatilityRatiosInputSize),
 										),
+										giu.Label("全局下单"),
+										giu.Row(
+											giu.Label("分仓买F1:"),
+											giu.InputFloat(&global.VolatilityRatiosF1).Size(volatilityRatiosInputSize),
+											giu.Label("全仓买F5:"),
+											giu.InputFloat(&global.VolatilityRatiosF5).Size(volatilityRatiosInputSize),
+										),
+										giu.Row(
+											giu.Label("分仓卖F2:"),
+											giu.InputFloat(&global.VolatilityRatiosF2).Size(volatilityRatiosInputSize),
+											giu.Label("全仓卖F6:"),
+											giu.InputFloat(&global.VolatilityRatiosF6).Size(volatilityRatiosInputSize),
+										),
+										giu.Row(
+											giu.Label("撤单清仓卖F12:"),
+											giu.InputFloat(&global.VolatilityRatiosF12).Size(volatilityRatiosInputSize),
+										),
 									),
 								)),
 						),

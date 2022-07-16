@@ -59,15 +59,15 @@ func main() {
 	).RegisterKeyboardShortcuts( // 切换模式一二
 		giu.WindowShortcut{Key: giu.KeyTab, Modifier: giu.ModNone, Callback: func() { global.ReverseTradeMode() }},
 	).RegisterKeyboardShortcuts( // 全局买入
-		giu.WindowShortcut{Key: giu.KeyF1, Modifier: giu.ModNone, Callback: func() {}}, //分仓买
-		giu.WindowShortcut{Key: giu.KeyF2, Modifier: giu.ModNone, Callback: func() {}}, //全仓买
-		giu.WindowShortcut{Key: giu.KeyF5, Modifier: giu.ModNone, Callback: func() {}}, //分仓卖
-		giu.WindowShortcut{Key: giu.KeyF6, Modifier: giu.ModNone, Callback: func() {}}, //全仓卖
+		giu.WindowShortcut{Key: giu.KeyF1, Modifier: giu.ModNone, Callback: func() { go binance.NewGlobalTrader("F1").Trade() }}, //分仓买
+		giu.WindowShortcut{Key: giu.KeyF2, Modifier: giu.ModNone, Callback: func() { go binance.NewGlobalTrader("F2").Trade() }}, //全仓买
+		giu.WindowShortcut{Key: giu.KeyF5, Modifier: giu.ModNone, Callback: func() { go binance.NewGlobalTrader("F5").Trade() }}, //分仓卖
+		giu.WindowShortcut{Key: giu.KeyF6, Modifier: giu.ModNone, Callback: func() { go binance.NewGlobalTrader("F6").Trade() }}, //全仓卖
 	).RegisterKeyboardShortcuts(
-		giu.WindowShortcut{Key: giu.KeyF4, Modifier: giu.ModNone, Callback: func() {}},  // 撤销所有买单
-		giu.WindowShortcut{Key: giu.KeyF8, Modifier: giu.ModNone, Callback: func() {}},  // 撤销所有卖单
-		giu.WindowShortcut{Key: giu.KeyF9, Modifier: giu.ModNone, Callback: func() {}},  // 撤销所有单
-		giu.WindowShortcut{Key: giu.KeyF12, Modifier: giu.ModNone, Callback: func() {}}, // 撤销所有单后市价卖出
+		giu.WindowShortcut{Key: giu.KeyF4, Modifier: giu.ModNone, Callback: func() { go binance.NewGlobalTrader("F4").Trade() }},   // 撤销所有买单
+		giu.WindowShortcut{Key: giu.KeyF8, Modifier: giu.ModNone, Callback: func() { go binance.NewGlobalTrader("F8").Trade() }},   // 撤销所有卖单
+		giu.WindowShortcut{Key: giu.KeyF9, Modifier: giu.ModNone, Callback: func() { go binance.NewGlobalTrader("F9").Trade() }},   // 撤销所有单
+		giu.WindowShortcut{Key: giu.KeyF12, Modifier: giu.ModNone, Callback: func() { go binance.NewGlobalTrader("F12").Trade() }}, // 撤销所有单后市价卖出
 	)
 	app.Run(mainWindow)
 }
@@ -88,8 +88,8 @@ Enter: 确认分仓数
 全局撤单:
 	F4: 撤当前交易对所有买单
 	F8: 撤当前交易对所有卖单
-	F9: 撤当前交易对所有单
-	F12: 撤当前交易对所有单, 当前持有全部按市价卖出
+	F9: 撤当前交易对委托
+	F12: 撤当前交易对委托, 当前持有全部按市价卖出
 
 默认分仓下单，请确保合理的分仓份数
 快捷卖买: (请对应订单簿2)
