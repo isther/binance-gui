@@ -3,6 +3,7 @@ package binance
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"strconv"
 
 	"github.com/adshao/go-binance/v2"
@@ -42,9 +43,20 @@ func priceFloat648Point(s string) string {
 	return s
 }
 
+// 当前余额/分仓数/当前实时价格
 func UpdateAverageAmount() {
-	free1, _ := strconv.ParseFloat(AccountInstance.One.Free, 64)
-	free2, _ := strconv.ParseFloat(AccountInstance.Two.Free, 64)
-	global.AverageSymbol1Amount = free1 / float64(global.Average)
-	global.AverageSymbol2Amount = free2 / float64(global.Average)
+	free, _ := strconv.ParseFloat(AccountInstance.Two.Free, 64)
+	if reflect.DeepEqual(free, 0.0) {
+		console.ConsoleInstance.Write(fmt.Sprintf("余额不足，无法分仓"))
+	}
+
+	console.ConsoleInstance.Write("分仓中...")
+	for {
+		if aggTradePrice, _ := strconv.ParseFloat(AggTradePrice, 64); !reflect.DeepEqual(aggTradePrice, 0.0) {
+			averageSymbol1AmountStr := correction(fmt.Sprintf("%f", (0.97*free/float64(global.Average))/aggTradePrice), AccountInstance.LotSizeFilter.stepSize)
+			global.AverageSymbol1Amount, _ = strconv.ParseFloat(averageSymbol1AmountStr, 64)
+			console.ConsoleInstance.Write(fmt.Sprintf("已分仓, 单仓购买数量: %v", global.AverageSymbol1Amount))
+			return
+		}
+	}
 }
