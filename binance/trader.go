@@ -3,6 +3,7 @@ package binance
 import (
 	"context"
 	"fmt"
+	"math"
 	"reflect"
 	"strconv"
 	"time"
@@ -65,6 +66,15 @@ func (t *Trader) Trade() {
 	}
 }
 
+/*
+全仓购买:
+	模式一:
+		price: 价格均为按键价格加减一步进
+		quantity: 当前余额可买卖的所有数量
+	模式二:
+	 	price: 前五档按照按键价格加减一步进, 六到二十当前市价*对应波动比 -- global.VolatilityRatiosBuy global.VolatilityRatiosSale
+		quantity: 当前余额可买卖的所有数量
+*/
 func (t *Trader) createOrderOnFullWarehouse() {
 	var (
 		priceStr    string
@@ -72,28 +82,73 @@ func (t *Trader) createOrderOnFullWarehouse() {
 	)
 
 	if t.sideType == libBinance.SideTypeBuy {
-		price, _ := strconv.ParseFloat(depthTable.Bids[t.tableID].Price, 64)
+		//{{{ Prepare price:
+		var (
+			price float64
+		)
+		if global.TradeMode == global.AllPlusOneSize || t.tableID < 5 {
+			//模式一: 按键价格+1步进
+			price, _ = strconv.ParseFloat(depthTable.Bids[t.tableID].Price, 64)
+			price = t.pricePlusTickSize(price)
+		} else {
+			//模式二: 前五档按照按键价格加一步进, 六到二十当前市价*对应波动比 -- global.VolatilityRatiosBuy global.VolatilityRatiosSale
+			price, _ = strconv.ParseFloat(AggTradePrice, 64)
+			price = price * float64(global.VolatilityRatiosBuy[t.tableID])
+		}
 		price = t.priceCorrection(price)
 		priceStr = fmt.Sprintf("%f", price)
+		//}}}
 
-		free, _ := strconv.ParseFloat(AccountInstance.One.Free, 64)
-		quantity := free / price
-		quantityStr = t.quantityCorrection(quantity)
+		//{{{ Prepare quantity: 当前余额/按键价格=数量
+		free, _ := strconv.ParseFloat(AccountInstance.Two.Free, 64)
+		quantity := t.quantityCorrection(float64(free / price))
+		quantityStr = fmt.Sprintf("%f", quantity)
+		//}}}
+		console.ConsoleInstance.Write(fmt.Sprintf("全仓买入"))
 	} else {
-		price, _ := strconv.ParseFloat(depthTable.Asks[t.tableID].Price, 64)
+		//{{{ Prepare price:
+		var (
+			price float64
+		)
+		if global.TradeMode == global.AllPlusOneSize || t.tableID < 5 {
+			//模式一: 按键价格-1步进
+			price, _ = strconv.ParseFloat(depthTable.Asks[t.tableID].Price, 64)
+			price = t.priceSubTickSize(price)
+		} else {
+			price, _ = strconv.ParseFloat(AggTradePrice, 64)
+			price = price * float64(global.VolatilityRatiosSale[t.tableID])
+		}
 		price = t.priceCorrection(price)
 		priceStr = fmt.Sprintf("%f", price)
+
+		//}}}
+
+		//{{{ Prepare quantity: 当前持有全部卖出
 		quantityStr = AccountInstance.One.Free
+
+		// Check Balance: 检查余额是否为零
+		quantity, _ := strconv.ParseFloat(quantityStr, 64)
+		quantity = t.quantityCorrection(quantity)
+		if reflect.DeepEqual(quantity, 0.0) {
+			console.ConsoleInstance.Write(fmt.Sprintf("已全仓卖出, 无需再次操作"))
+			return
+		}
+		quantityStr = fmt.Sprintf("%f", quantity)
+		//}}}
 	}
 
-	quantity, _ := strconv.ParseFloat(quantityStr, 64)
-	if reflect.DeepEqual(quantity, 0.0) {
-		console.ConsoleInstance.Write("账户余额不足")
-		return
-	}
 	t.createOrder(priceStr, quantityStr)
 }
 
+/*
+分仓购买:
+	模式一:
+		price: 价格均为按键价格加减一步进
+		quantity: 分仓后的固定数量 global.AverageSymbol1Amount
+	模式二:
+		price: 前五档按照按键价格加减一步进, 六到二十当前市价*对应波动比 global.VolatilityRatiosBuy global.VolatilityRatiosSale
+		quantity: 分仓后的固定数量 global.AverageSymbol1Amount
+*/
 func (t *Trader) createOrderOnSubWarehouse() {
 	var (
 		priceStr    string
@@ -101,25 +156,64 @@ func (t *Trader) createOrderOnSubWarehouse() {
 	)
 
 	if t.sideType == libBinance.SideTypeBuy {
-		price, _ := strconv.ParseFloat(depthTable.Bids[t.tableID].Price, 64)
+		//{{{ Prepare price:
+		var (
+			price float64
+		)
+		if global.TradeMode == global.AllPlusOneSize || t.tableID < 5 {
+			//模式一: 按键价格加一步进
+			price, _ = strconv.ParseFloat(depthTable.Bids[t.tableID].Price, 64)
+			price = t.pricePlusTickSize(price)
+		} else {
+			//模式二: 前五档按照按键价格加一步进, 六到二十当前市价*对应波动比 -- global.VolatilityRatiosBuy global.VolatilityRatiosSale
+			price, _ = strconv.ParseFloat(AggTradePrice, 64)
+			price = price * float64(global.VolatilityRatiosBuy[t.tableID])
+		}
 		price = t.priceCorrection(price)
 		priceStr = fmt.Sprintf("%f", price)
+		//}}}
 
-		quantity := global.AverageSymbol2Amount / price
-		quantityStr = t.quantityCorrection(quantity)
+		//{{{ Prepare quantity: 分仓的固定数量 global.AverageSymbol1Amount
+		quantity := t.quantityCorrection(global.AverageSymbol1Amount)
+		quantityStr = fmt.Sprintf("%f", quantity)
+		//}}}
+
+		console.ConsoleInstance.Write(fmt.Sprintf("分仓买入"))
 	} else {
-		price, _ := strconv.ParseFloat(depthTable.Asks[t.tableID].Price, 64)
+		//{{{ Prepare price:
+		var (
+			price float64
+		)
+		if global.TradeMode == global.AllPlusOneSize || t.tableID < 5 {
+			//模式一: 按键价格减一步进
+			price, _ = strconv.ParseFloat(depthTable.Asks[t.tableID].Price, 64)
+			price = t.priceSubTickSize(price)
+		} else {
+			//模式二: 前五档按照按键价格加一步进, 六到二十当前市价*对应波动比 -- global.VolatilityRatiosBuy global.VolatilityRatiosSale
+			price, _ = strconv.ParseFloat(AggTradePrice, 64)
+			price = price * float64(global.VolatilityRatiosSale[t.tableID])
+		}
 		price = t.priceCorrection(price)
 		priceStr = fmt.Sprintf("%f", price)
 
-		quantityStr = fmt.Sprintf("%f", global.AverageSymbol1Amount)
+		//}}}
+
+		// {{{ Prepare quantity: 分仓的固定数量 global.AverageSymbol1Amount
+		quantity := t.quantityCorrection(global.AverageSymbol1Amount)
+		quantityStr = fmt.Sprintf("%f", quantity)
+		//}}}
+
+		// {{{ Check Balance: 检查余额是否充足
+		quantityAll, _ := strconv.ParseFloat(AccountInstance.One.Free, 64)
+		if !float64CompareSmallerOrEqual(quantity, quantityAll, AccountInstance.LotSizeFilter.stepSize) {
+			console.ConsoleInstance.Write(fmt.Sprintf("余额不足, 持仓数量: %v下单数量: %v", quantityAll, quantity))
+			return
+		}
+		//}}}
+
+		console.ConsoleInstance.Write(fmt.Sprintf("分仓卖出"))
 	}
 
-	quantity, _ := strconv.ParseFloat(quantityStr, 64)
-	if reflect.DeepEqual(quantity, 0.0) {
-		console.ConsoleInstance.Write("账户余额不足")
-		return
-	}
 	t.createOrder(priceStr, quantityStr)
 }
 
@@ -133,7 +227,7 @@ func (t *Trader) createOrder(price, quantity string) {
 		return
 	}
 
-	console.ConsoleInstance.Write(fmt.Sprintf("OK: ID: %s price: %s quantity: %s",
+	console.ConsoleInstance.Write(fmt.Sprintf("[CREATE] OK: ID: %s price: %s quantity: %s",
 		order.ClientOrderID,
 		price,
 		quantity,
@@ -163,28 +257,47 @@ func (t *Trader) cancelAOrder(clientOrderID string) {
 		console.ConsoleInstance.Write(fmt.Sprintf("Error: %v", err))
 		return
 	}
-	console.ConsoleInstance.Write(fmt.Sprintf("OK, key: %v id: %v", t.key, clientOrderID))
+	console.ConsoleInstance.Write(fmt.Sprintf("[CANCEL] OK, key: %v id: %v", t.key, clientOrderID))
 }
 
-func (t *Trader) priceCorrection(price float64) float64 {
-	priceStr := correction(fmt.Sprintf("%f", price), AccountInstance.PriceFilter.tickSize)
-
-	price, err := strconv.ParseFloat(priceStr, 64)
+func (t *Trader) pricePlusTickSize(price float64) float64 {
+	tickSize, err := strconv.ParseFloat(AccountInstance.PriceFilter.tickSize, 64)
 	if err != nil {
-		console.ConsoleInstance.Write(fmt.Sprintf("Price correction error: %v", err))
-		return 0
+		console.ConsoleInstance.Write(fmt.Sprintf("Price plus tickSize error: %v", err))
+		return tickSize
 	}
 
+	return price + tickSize
+}
+
+func (t *Trader) priceSubTickSize(price float64) float64 {
 	tickSize, err := strconv.ParseFloat(AccountInstance.PriceFilter.tickSize, 64)
-	if t.sideType == libBinance.SideTypeBuy {
-		return price + tickSize
+	if err != nil {
+		console.ConsoleInstance.Write(fmt.Sprintf("Price plus tickSize error: %v", err))
+		return tickSize
 	}
 
 	return price - tickSize
 }
 
-func (t *Trader) quantityCorrection(quantity float64) string {
-	return correction(fmt.Sprintf("%f", quantity), AccountInstance.LotSizeFilter.stepSize)
+func (t *Trader) priceCorrection(price float64) float64 {
+	priceStr := correction(fmt.Sprintf("%.8f", price), AccountInstance.PriceFilter.tickSize)
+	price, err := strconv.ParseFloat(priceStr, 64)
+	if err != nil {
+		console.ConsoleInstance.Write(fmt.Sprintf("Price correction error: %v", err))
+		return 0
+	}
+	return price
+}
+
+func (t *Trader) quantityCorrection(quantity float64) float64 {
+	quantityStr := correction(fmt.Sprintf("%.8f", quantity), AccountInstance.LotSizeFilter.stepSize)
+	quantity, err := strconv.ParseFloat(quantityStr, 64)
+	if err != nil {
+		console.ConsoleInstance.Write(fmt.Sprintf("Quantity correction error: %v", err))
+		return 0
+	}
+	return quantity
 }
 
 func correction(val, size string) string {
@@ -193,6 +306,7 @@ func correction(val, size string) string {
 		length = 0
 	)
 
+	start = false
 	for i := len(size) - 1; i > 0; i-- {
 		if size[i] == '1' {
 			start = true
@@ -209,4 +323,13 @@ func correction(val, size string) string {
 		}
 	}
 	return val
+}
+
+func float64CompareSmallerOrEqual(smaller, greater float64, accuracyStr string) bool {
+	accuracy, err := strconv.ParseFloat(accuracyStr, 64)
+	if err != nil {
+		console.ConsoleInstance.Write(fmt.Sprintf("Compare float64 failed: %v", err))
+		return false
+	}
+	return math.Max(smaller, greater) == greater || math.Abs(greater-smaller) < accuracy
 }
