@@ -47,12 +47,10 @@ func StartWebSocketStream() {
 				wsPartialDepthServerDoneC, wsPartialDepthServerStopC = runOneWsPartialDepth()
 			}()
 
-			go func() {
-				wsAggTradeServerStopC <- struct{}{}
-				<-wsAggTradeServerDoneC
+			wsAggTradeServerStopC <- struct{}{}
+			<-wsAggTradeServerDoneC
 
-				wsAggTradeServerDoneC, wsAggTradeServerStopC = runOneAggTradeDepth()
-			}()
+			wsAggTradeServerDoneC, wsAggTradeServerStopC = runOneAggTradeDepth()
 
 			go func() {
 				wsUpdateAccountStopC <- struct{}{}

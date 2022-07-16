@@ -183,8 +183,9 @@ func mainWindow() {
 										SetStyle(giu.StyleVarFramePadding, 10, 10).
 										To(
 											giu.Row(
-												giu.Button(fmt.Sprintf("单仓数量: %s: %.8f ",
-													binance.AccountInstance.One.Asset, global.AverageSymbol1Amount)),
+												giu.Button(fmt.Sprintf("单仓数量: %s: %.8f / %s : %.8f",
+													binance.AccountInstance.One.Asset, global.AverageSymbol1Amount,
+													binance.AccountInstance.Two.Asset, global.AverageSymbol2Amount)),
 											),
 										),
 									giu.Row(

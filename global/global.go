@@ -9,6 +9,7 @@ var (
 	// 分仓参数
 	Average              int32 = 10
 	AverageSymbol1Amount float64
+	AverageSymbol2Amount float64
 
 	// 切换交易对channel
 	FreshC = make(chan string)

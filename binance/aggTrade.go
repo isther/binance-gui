@@ -31,7 +31,6 @@ func runOneAggTradeDepth() (chan struct{}, chan struct{}) {
 
 	wsAggTradeHandler := func(event *libBinance.WsAggTradeEvent) {
 		AggTradePrice = priceFloat648Point(event.Price)
-		fmt.Println(AggTradePrice)
 		globalWsAggTradeServerC <- event
 	}
 
