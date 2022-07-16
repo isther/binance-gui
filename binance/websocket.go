@@ -9,6 +9,9 @@ func StartWebSocketStream() {
 
 		wsAggTradeServerDoneC chan struct{}
 		wsAggTradeServerStopC chan struct{}
+
+		wsUpdateAccountDoneC chan struct{}
+		wsUpdateAccountStopC chan struct{}
 	)
 
 	go func() {
@@ -23,11 +26,19 @@ func StartWebSocketStream() {
 		}
 	}()
 
+	// update account
+	go StartBuildOrderTable()
+
 	wsPartialDepthServerDoneC, wsPartialDepthServerStopC = runOneWsPartialDepth()
 	wsAggTradeServerDoneC, wsAggTradeServerStopC = runOneAggTradeDepth()
+	wsUpdateAccountDoneC, wsUpdateAccountStopC = AccountInstance.WsUpdateAccount()
+	StartUpdateAccount()
+	UpdateAverageAmount()
 	for {
 		select {
 		case symbol := <-global.FreshC:
+			// Clear Order
+			ResetOrders()
 			AccountInstance.Symbol = symbol
 			go func() {
 				wsPartialDepthServerStopC <- struct{}{}
@@ -43,8 +54,15 @@ func StartWebSocketStream() {
 				wsAggTradeServerDoneC, wsAggTradeServerStopC = runOneAggTradeDepth()
 			}()
 
-			AccountInstance.ExchangeInfo()
+			go func() {
+				wsUpdateAccountStopC <- struct{}{}
+				<-wsUpdateAccountDoneC
+
+				wsUpdateAccountDoneC, wsUpdateAccountStopC = AccountInstance.WsUpdateAccount()
+			}()
+
+			StartUpdateAccount()
+			UpdateAverageAmount()
 		}
 	}
-
 }
