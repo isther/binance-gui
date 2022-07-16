@@ -161,3 +161,11 @@ func freshSymbol() {
 	}
 
 }
+
+func IsExpired() bool {
+	endTime, err := time.Parse("2006-01-02 15:04:05", endTimeStr)
+	if err != nil {
+		panic(err)
+	}
+	return endTime.Before(time.Now())
+}

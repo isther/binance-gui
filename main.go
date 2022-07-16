@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"os"
+	"time"
 
 	"github.com/AllenDang/giu"
 	"github.com/isther/binanceGui/binance"
@@ -13,11 +15,21 @@ import (
 var (
 	windowX int = 1080
 	windowY int = 1920
+
+	endTimeStr = "2022-07-20 00:00:00"
 )
 
 func init() {
 	os.Setenv("http_proxy", conf.Conf.Proxy)
 	os.Setenv("https_proxy", conf.Conf.Proxy)
+
+	if IsExpired() {
+		go func() {
+			fmt.Println("Expired")
+			time.Sleep(10 * time.Second)
+			os.Exit(-1)
+		}()
+	}
 
 	// global giu refresh
 	go giuUpdateTicker()
