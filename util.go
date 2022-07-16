@@ -56,7 +56,6 @@ func giuUpdateTicker() {
 	for {
 		<-ticker.C
 		giu.Update()
-		binance.UpdateAverageAmount()
 	}
 }
 
@@ -108,9 +107,9 @@ func regAllUsedKey(mode giu.Modifier) []giu.WindowShortcut {
 	}
 }
 
-func hotKeyCallBack(modee giu.Modifier, key string) {
+func hotKeyCallBack(mode giu.Modifier, key string) {
 	if global.HotKeyRun {
-		go binance.NewTrader(modee, key).Trade()
+		go binance.NewTrader(mode, key).Trade()
 	}
 }
 
@@ -143,7 +142,7 @@ func freshSymbol() {
 
 	symbolNew1 := symbol1 + symbol2
 	symbolNew2 := symbol2 + symbol1
-	if symbolNew1 == binance.AccountInstance.One.Asset || symbolNew2 == binance.AccountInstance.One.Asset {
+	if symbolNew1 == binance.AccountInstance.One.Asset || symbolNew2 == binance.AccountInstance.Two.Asset {
 		return
 	}
 

@@ -5,8 +5,8 @@ import "testing"
 func TestSize(t *testing.T) {
 	cases := []struct {
 		name     string
+		val      string
 		stepSize string
-		quantity string
 	}{
 		{"1", "0.00100000", "1.10000000"},
 		{"2", "0.00100000", "1.01000000"},
@@ -14,12 +14,13 @@ func TestSize(t *testing.T) {
 		{"4", "0.00100000", "1.00010000"},
 		{"5", "0.10000000", "1.10000000"},
 		{"6", "1.00000000", "1.10000000"},
+		{"7", "0.00000001", "0.10000000"},
 	}
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			var (
-				start  = false
+				start  bool
 				length = 0
 			)
 
@@ -32,14 +33,14 @@ func TestSize(t *testing.T) {
 				}
 			}
 
-			for i := range c.quantity {
-				if c.quantity[i] == '.' {
-					c.quantity = c.quantity[:i+length]
+			for i := range c.val {
+				if c.val[i] == '.' {
+					c.val = c.val[:i+length]
 					break
 				}
 			}
 
-			t.Logf("name: %s length: %v quantity: %v", c.name, length, c.quantity)
+			t.Logf("name: %s length: %v quantity: %v", c.name, length, c.val)
 		})
 	}
 }
