@@ -46,7 +46,7 @@ func NewGlobalTrader(key string) *GlobalTrader {
 
 	return &GlobalTrader{
 		key:           key,
-		clientOrderID: fmt.Sprintf("G%d", time.Now().UnixNano()),
+		clientOrderID: fmt.Sprintf("%d%s", time.Now().UnixNano(), key),
 		sideType:      sideType,
 	}
 }
@@ -100,11 +100,9 @@ func (g *GlobalTrader) createOrderOnSubWarehouse() {
 		console.ConsoleInstance.Write(fmt.Sprintf("全局分仓卖出"))
 	}
 
-	price = g.priceCorrection(price)
-	priceStr = fmt.Sprintf("%f", price)
+	priceStr = g.priceCorrection(price)
 
-	quantity := g.quantityCorrection(global.AverageSymbol1Amount)
-	quantityStr = fmt.Sprintf("%f", quantity)
+	quantityStr = g.quantityCorrection(global.AverageSymbol1Amount)
 
 	g.createOrder(priceStr, quantityStr)
 }
@@ -122,12 +120,10 @@ func (g *GlobalTrader) createOrderOnFullWarehouse() {
 	price, _ := strconv.ParseFloat(AggTradePrice, 64)
 	if g.sideType == libBinance.SideTypeBuy {
 		price = price * float64(global.VolatilityRatiosF2)
-		price = g.priceCorrection(price)
-		priceStr = fmt.Sprintf("%f", price)
+		priceStr = g.priceCorrection(price)
 
 		free, _ := strconv.ParseFloat(AccountInstance.Two.Free, 64)
-		quantity := g.quantityCorrection(float64(free / price))
-		quantityStr = fmt.Sprintf("%f", quantity)
+		quantityStr = g.quantityCorrection(float64(free / price))
 		console.ConsoleInstance.Write(fmt.Sprintf("全局全仓买入"))
 	} else {
 		if g.key == "F12" {
@@ -137,41 +133,28 @@ func (g *GlobalTrader) createOrderOnFullWarehouse() {
 			price = price * float64(global.VolatilityRatiosF6)
 			console.ConsoleInstance.Write(fmt.Sprintf("全局全仓卖出"))
 		}
-		price = g.priceCorrection(price)
-		priceStr = fmt.Sprintf("%f", price)
+		priceStr = g.priceCorrection(price)
 
 		quantityStr = AccountInstance.One.Free
 		// Check Balance: 检查余额是否为零
 		quantity, _ := strconv.ParseFloat(quantityStr, 64)
-		quantity = g.quantityCorrection(quantity)
+		quantityStr = g.quantityCorrection(quantity)
+		quantity, _ = strconv.ParseFloat(quantityStr, 64)
 		if reflect.DeepEqual(quantity, 0.0) {
 			console.ConsoleInstance.Write(fmt.Sprintf("已全仓卖出, 无需再次操作"))
 			return
 		}
-		quantityStr = fmt.Sprintf("%f", quantity)
 	}
 
 	g.createOrder(priceStr, quantityStr)
 }
 
-func (g *GlobalTrader) priceCorrection(price float64) float64 {
-	priceStr := correction(fmt.Sprintf("%.8f", price), AccountInstance.PriceFilter.tickSize)
-	price, err := strconv.ParseFloat(priceStr, 64)
-	if err != nil {
-		console.ConsoleInstance.Write(fmt.Sprintf("Price correction error: %v", err))
-		return 0
-	}
-	return price
+func (g *GlobalTrader) priceCorrection(price float64) string {
+	return correction(price, AccountInstance.PriceFilter.tickSize)
 }
 
-func (g *GlobalTrader) quantityCorrection(quantity float64) float64 {
-	quantityStr := correction(fmt.Sprintf("%.8f", quantity), AccountInstance.LotSizeFilter.stepSize)
-	quantity, err := strconv.ParseFloat(quantityStr, 64)
-	if err != nil {
-		console.ConsoleInstance.Write(fmt.Sprintf("Quantity correction error: %v", err))
-		return 0
-	}
-	return quantity
+func (g *GlobalTrader) quantityCorrection(quantity float64) string {
+	return correction(quantity, AccountInstance.LotSizeFilter.stepSize)
 }
 
 // 撤掉所有买单
@@ -224,6 +207,7 @@ func (g *GlobalTrader) cancelAllOrderAndSellAllPositions() {
 }
 
 func (g *GlobalTrader) createOrder(price, quantity string) {
+	console.ConsoleInstance.Write(fmt.Sprintf("%s %s", price, quantity))
 	_, err := GetClient().NewCreateOrderService().Symbol(AccountInstance.Symbol).
 		Side(g.sideType).Type(libBinance.OrderTypeLimit).
 		TimeInForce(libBinance.TimeInForceTypeGTC).Quantity(quantity).

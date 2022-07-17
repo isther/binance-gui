@@ -6,6 +6,7 @@ import (
 	"math"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/AllenDang/giu"
@@ -13,6 +14,7 @@ import (
 	"github.com/isther/binanceGui/global"
 	"github.com/isther/binanceGui/hotkey"
 	"github.com/isther/binanceGui/orderlist"
+	"github.com/isther/binanceGui/utils"
 
 	libBinance "github.com/adshao/go-binance/v2"
 )
@@ -97,14 +99,12 @@ func (t *Trader) createOrderOnFullWarehouse() {
 			price, _ = strconv.ParseFloat(AggTradePrice, 64)
 			price = price * float64(global.VolatilityRatiosBuy[t.tableID])
 		}
-		price = t.priceCorrection(price)
-		priceStr = fmt.Sprintf("%f", price)
+		priceStr = t.priceCorrection(price)
 		//}}}
 
 		//{{{ Prepare quantity: 当前余额/按键价格=数量
 		free, _ := strconv.ParseFloat(AccountInstance.Two.Free, 64)
-		quantity := t.quantityCorrection(float64(free / price))
-		quantityStr = fmt.Sprintf("%f", quantity)
+		quantityStr = t.quantityCorrection(float64(free / price))
 		//}}}
 		console.ConsoleInstance.Write(fmt.Sprintf("全仓买入"))
 	} else {
@@ -120,8 +120,7 @@ func (t *Trader) createOrderOnFullWarehouse() {
 			price, _ = strconv.ParseFloat(AggTradePrice, 64)
 			price = price * float64(global.VolatilityRatiosSale[t.tableID])
 		}
-		price = t.priceCorrection(price)
-		priceStr = fmt.Sprintf("%f", price)
+		priceStr = t.priceCorrection(price)
 
 		//}}}
 
@@ -130,12 +129,11 @@ func (t *Trader) createOrderOnFullWarehouse() {
 
 		// Check Balance: 检查余额是否为零
 		quantity, _ := strconv.ParseFloat(quantityStr, 64)
-		quantity = t.quantityCorrection(quantity)
+		quantityStr = t.quantityCorrection(quantity)
 		if reflect.DeepEqual(quantity, 0.0) {
 			console.ConsoleInstance.Write(fmt.Sprintf("已全仓卖出, 无需再次操作"))
 			return
 		}
-		quantityStr = fmt.Sprintf("%f", quantity)
 		//}}}
 	}
 
@@ -171,13 +169,11 @@ func (t *Trader) createOrderOnSubWarehouse() {
 			price, _ = strconv.ParseFloat(AggTradePrice, 64)
 			price = price * float64(global.VolatilityRatiosBuy[t.tableID])
 		}
-		price = t.priceCorrection(price)
-		priceStr = fmt.Sprintf("%f", price)
+		priceStr = t.priceCorrection(price)
 		//}}}
 
 		//{{{ Prepare quantity: 分仓的固定数量 global.AverageSymbol1Amount
-		quantity := t.quantityCorrection(global.AverageSymbol1Amount)
-		quantityStr = fmt.Sprintf("%f", quantity)
+		quantityStr = t.quantityCorrection(global.AverageSymbol1Amount)
 		//}}}
 
 		console.ConsoleInstance.Write(fmt.Sprintf("分仓买入"))
@@ -195,14 +191,12 @@ func (t *Trader) createOrderOnSubWarehouse() {
 			price, _ = strconv.ParseFloat(AggTradePrice, 64)
 			price = price * float64(global.VolatilityRatiosSale[t.tableID])
 		}
-		price = t.priceCorrection(price)
-		priceStr = fmt.Sprintf("%f", price)
+		priceStr = t.priceCorrection(price)
 
 		//}}}
 
 		// {{{ Prepare quantity: 分仓的固定数量 global.AverageSymbol1Amount
-		quantity := t.quantityCorrection(global.AverageSymbol1Amount)
-		quantityStr = fmt.Sprintf("%f", quantity)
+		quantityStr = t.quantityCorrection(global.AverageSymbol1Amount)
 		//}}}
 
 		// {{{ Check Balance: 检查余额是否充足
@@ -272,49 +266,33 @@ func (t *Trader) priceSubTickSize(price float64) float64 {
 	return price - tickSize
 }
 
-func (t *Trader) priceCorrection(price float64) float64 {
-	priceStr := correction(fmt.Sprintf("%.8f", price), AccountInstance.PriceFilter.tickSize)
-	price, err := strconv.ParseFloat(priceStr, 64)
-	if err != nil {
-		console.ConsoleInstance.Write(fmt.Sprintf("Price correction error: %v", err))
-		return 0
-	}
-	return price
+func (t *Trader) priceCorrection(price float64) string {
+	return correction(price, AccountInstance.PriceFilter.tickSize)
 }
 
-func (t *Trader) quantityCorrection(quantity float64) float64 {
-	quantityStr := correction(fmt.Sprintf("%.8f", quantity), AccountInstance.LotSizeFilter.stepSize)
-	quantity, err := strconv.ParseFloat(quantityStr, 64)
-	if err != nil {
-		console.ConsoleInstance.Write(fmt.Sprintf("Quantity correction error: %v", err))
-		return 0
-	}
-	return quantity
+func (t *Trader) quantityCorrection(quantity float64) string {
+	return correction(quantity, AccountInstance.LotSizeFilter.stepSize)
 }
 
-func correction(val, size string) string {
+func correction(val float64, size string) string {
 	var (
-		start  bool
-		length = 0
+		oneIdx    = strings.Index(size, "1")
+		pointIdx  = strings.Index(size, ".")
+		precision int
+		resStr    string
 	)
-
-	start = false
-	for i := len(size) - 1; i > 0; i-- {
-		if size[i] == '1' {
-			start = true
-		}
-		if start {
-			length++
-		}
+	if oneIdx < pointIdx {
+		precision = oneIdx - pointIdx + 1
+		resStr = fmt.Sprintf("%.8f", utils.RoundLower(val, precision))
+		pointIdx = strings.Index(resStr, ".")
+		resStr = resStr[:pointIdx]
+		return resStr
 	}
 
-	for i := range val {
-		if val[i] == '.' {
-			val = val[:i+length]
-			break
-		}
-	}
-	return val
+	precision = oneIdx - pointIdx
+	resStr = fmt.Sprintf("%.8f", utils.RoundLower(val, precision))
+
+	return resStr
 }
 
 func float64CompareSmallerOrEqual(smaller, greater float64, accuracyStr string) bool {

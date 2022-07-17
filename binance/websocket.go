@@ -43,11 +43,13 @@ func StartWebSocketStream() {
 				wsPartialDepthServerDoneC, wsPartialDepthServerStopC = runOneWsPartialDepth()
 			}()
 
-			wsAggTradeServerStopC <- struct{}{}
-			<-wsAggTradeServerDoneC
+			go func() {
+				wsAggTradeServerStopC <- struct{}{}
+				<-wsAggTradeServerDoneC
 
-			wsAggTradeServerDoneC, wsAggTradeServerStopC = runOneAggTradeDepth()
+				wsAggTradeServerDoneC, wsAggTradeServerStopC = runOneAggTradeDepth()
 
+			}()
 			go func() {
 				wsUpdateAccountStopC <- struct{}{}
 				<-wsUpdateAccountDoneC
@@ -56,7 +58,7 @@ func StartWebSocketStream() {
 			}()
 
 			StartUpdateAccount()
-			UpdateAverageAmount()
+			// UpdateAverageAmount()
 		}
 	}
 }
