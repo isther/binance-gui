@@ -3,6 +3,7 @@ package binance
 import (
 	"context"
 	"fmt"
+	"image/color"
 	"sort"
 	"strings"
 	"time"
@@ -104,7 +105,7 @@ func buildHttpDepthBuyTable(res *libBinance.DepthResponse) []*giu.TableRowWidget
 				),
 			giu.Style().
 				SetFontSize(global.Order2FontSize).
-				// SetColor(giu.StyleColorText, orderColorSet()).
+				SetColor(giu.StyleColorText, order1ColorSet(v)).
 				To(
 					giu.Label(priceFloat648Point(fmt.Sprintf("%s", strSlice[i]))),
 				),
@@ -168,7 +169,7 @@ func buildHttpDepthSaleTable(res *libBinance.DepthResponse) []*giu.TableRowWidge
 				),
 			giu.Style().
 				SetFontSize(global.Order2FontSize).
-				// SetColor(giu.StyleColorText, orderColorSet()).
+				SetColor(giu.StyleColorText, order1ColorSet(v)).
 				To(
 					giu.Label(priceFloat648Point(fmt.Sprintf("%s", strSlice[i]))),
 				),
@@ -181,4 +182,25 @@ func buildHttpDepthSaleTable(res *libBinance.DepthResponse) []*giu.TableRowWidge
 		))
 	}
 	return rows
+}
+
+func order1ColorSet(ff float64) color.RGBA {
+	var (
+		priceColor = global.WHITE
+	)
+	ff *= 1000
+
+	if ff >= float64(global.Order1BigOrderReminder[4]) {
+		priceColor = global.BLACK
+	} else if ff >= float64(global.Order1BigOrderReminder[3]) {
+		priceColor = global.BLUE2
+	} else if ff >= float64(global.Order1BigOrderReminder[2]) {
+		priceColor = global.YELLOW
+	} else if ff >= float64(global.Order1BigOrderReminder[1]) {
+		priceColor = global.RED
+	} else {
+		priceColor = global.WHITE
+	}
+
+	return priceColor
 }

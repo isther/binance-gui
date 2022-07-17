@@ -40,6 +40,7 @@ func runOneWsPartialDepth() (chan struct{}, chan struct{}) {
 	)
 
 	wsDepthHandler := func(event *libBinance.WsPartialDepthEvent) {
+		wsDepthTable = event
 		globalWsPartialDepthServer <- event
 	}
 
