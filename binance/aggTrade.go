@@ -2,6 +2,7 @@ package binance
 
 import (
 	"fmt"
+	"image/color"
 	"strconv"
 	"time"
 
@@ -76,7 +77,10 @@ func buildAggTradeTable() []*giu.TableRowWidget {
 	timeStr := time.Unix(aggTradeNew.Time/1e3, 0)
 	rows = append(rows, giu.TableRow(
 		giu.Label(fmt.Sprintf("%v:%v", timeStr.Minute(), timeStr.Second())),
-		giu.Label(fmt.Sprintf("%v", priceFloat648Point(aggTradeNew.Price))),
+		giu.Style().SetColor(giu.StyleColorText, aggTradeColorSet(price, quantity)).
+			To(
+				giu.Label(fmt.Sprintf("%v", priceFloat648Point(aggTradeNew.Price))),
+			),
 		giu.Style().
 			SetColor(giu.StyleColorText, eColor).
 			To(
@@ -92,4 +96,25 @@ func buildAggTradeTable() []*giu.TableRowWidget {
 	}
 
 	return append(rows, wsAggTradeTable...)
+}
+
+func aggTradeColorSet(price, quantity float64) color.RGBA {
+	var (
+		priceColor = global.WHITE
+		ff         = price * quantity
+	)
+
+	if ff >= float64(global.AggTradeBigOrderReminder[4]) {
+		priceColor = global.BLACK
+	} else if ff >= float64(global.AggTradeBigOrderReminder[3]) {
+		priceColor = global.BLUE2
+	} else if ff >= float64(global.AggTradeBigOrderReminder[2]) {
+		priceColor = global.YELLOW
+	} else if ff >= float64(global.AggTradeBigOrderReminder[1]) {
+		priceColor = global.RED
+	} else {
+		priceColor = global.WHITE
+	}
+
+	return priceColor
 }

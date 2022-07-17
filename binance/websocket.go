@@ -26,9 +26,6 @@ func StartWebSocketStream() {
 		}
 	}()
 
-	// update account
-	go StartBuildOrderTable()
-
 	wsPartialDepthServerDoneC, wsPartialDepthServerStopC = runOneWsPartialDepth()
 	wsAggTradeServerDoneC, wsAggTradeServerStopC = runOneAggTradeDepth()
 	wsUpdateAccountDoneC, wsUpdateAccountStopC = AccountInstance.WsUpdateAccount()
@@ -38,7 +35,6 @@ func StartWebSocketStream() {
 		select {
 		case symbol := <-global.FreshC:
 			// Clear Order
-			ResetOrders()
 			AccountInstance.Symbol = symbol
 			go func() {
 				wsPartialDepthServerStopC <- struct{}{}

@@ -12,6 +12,7 @@ import (
 	"github.com/isther/binanceGui/console"
 	"github.com/isther/binanceGui/global"
 	"github.com/isther/binanceGui/hotkey"
+	"github.com/isther/binanceGui/orderlist"
 
 	libBinance "github.com/adshao/go-binance/v2"
 )
@@ -22,7 +23,8 @@ type Trader struct {
 	mode          giu.Modifier
 	clientOrderID string
 
-	key      byte
+	// key      byte
+	key      string
 	tableID  int
 	sideType libBinance.SideType
 }
@@ -42,9 +44,9 @@ func NewTrader(mode giu.Modifier, key string) *Trader {
 	}
 	return &Trader{
 		mode:          mode,
-		clientOrderID: fmt.Sprintf("%d%d", time.Now().UnixNano(), key[0]),
+		clientOrderID: fmt.Sprintf("%d%s", time.Now().UnixNano(), key),
 
-		key:      key[0],
+		key:      key,
 		tableID:  tableID,
 		sideType: sideType,
 	}
@@ -229,7 +231,7 @@ func (t *Trader) createOrder(price, quantity string) {
 }
 
 func (t *Trader) cancelOrder() {
-	orders := OpenOrdersInstance.GetOrders(t.key)
+	orders := orderlist.OrderListInstance.GetOrders(t.key)
 	if len(orders) == 0 {
 		console.ConsoleInstance.Write("No order")
 		return

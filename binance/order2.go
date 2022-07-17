@@ -2,6 +2,7 @@ package binance
 
 import (
 	"fmt"
+	"image/color"
 
 	"github.com/AllenDang/giu"
 	libBinance "github.com/adshao/go-binance/v2"
@@ -93,6 +94,7 @@ func buildWsPartialDepthTable() []*giu.TableRowWidget {
 				),
 			giu.Style().
 				SetFontSize(global.Order2FontSize).
+				SetColor(giu.StyleColorText, orderColorSet(price, quantity)).
 				To(
 					giu.Label(priceFloat648Point(fmt.Sprintf("%.8f", price))),
 				),
@@ -116,6 +118,7 @@ func buildWsPartialDepthTable() []*giu.TableRowWidget {
 				),
 			giu.Style().
 				SetFontSize(global.Order2FontSize).
+				SetColor(giu.StyleColorText, orderColorSet(price, quantity)).
 				To(
 					giu.Label(priceFloat648Point(fmt.Sprintf("%.8f", price))),
 				),
@@ -128,4 +131,25 @@ func buildWsPartialDepthTable() []*giu.TableRowWidget {
 		)
 	}
 	return rows
+}
+
+func orderColorSet(price, quantity float64) color.RGBA {
+	var (
+		priceColor = global.WHITE
+		ff         = price * quantity
+	)
+
+	if ff >= float64(global.Order2BigOrderReminder[4]) {
+		priceColor = global.BLACK
+	} else if ff >= float64(global.Order2BigOrderReminder[3]) {
+		priceColor = global.BLUE2
+	} else if ff >= float64(global.Order2BigOrderReminder[2]) {
+		priceColor = global.YELLOW
+	} else if ff >= float64(global.Order2BigOrderReminder[1]) {
+		priceColor = global.RED
+	} else {
+		priceColor = global.WHITE
+	}
+
+	return priceColor
 }

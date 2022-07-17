@@ -15,7 +15,7 @@ var (
 	FreshC = make(chan string)
 
 	// 交易模式参数
-	TradeMode            TransactionMode = AllPlusOneSize
+	TradeMode            TransactionMode = FiveAfterMulPoint
 	VolatilityRatiosBuy  [20]float32
 	VolatilityRatiosSale [20]float32
 	VolatilityRatiosF1   float32
@@ -23,6 +23,14 @@ var (
 	VolatilityRatiosF5   float32
 	VolatilityRatiosF6   float32
 	VolatilityRatiosF12  float32
+
+	// 大单提醒档位
+	// 成交明细
+	AggTradeBigOrderReminder [5]int32
+	// 订单簿2
+	Order2BigOrderReminder [5]int32
+	// 订单簿1
+	Order1BigOrderReminder [5]int32
 
 	// ws参数
 	Levels = 20
@@ -36,8 +44,14 @@ var (
 )
 
 var (
-	BLUE   = color.RGBA{0x00, 0x66, 0xCC, 0xFF}
 	RED    = color.RGBA{0xFF, 0x33, 0x33, 0xFF}
+	YELLOW = color.RGBA{0xFF, 0x99, 0x00, 0xFF}
+	BLUE   = color.RGBA{0x00, 0x66, 0xCC, 0xFF}
+	BLUE2  = color.RGBA{0x33, 0x66, 0xFF, 0xFF}
+	// BLACK  = color.RGBA{0x00, 0x00, 0x00, 0xFF}
+	BLACK = color.RGBA{0x7F, 0xFF, 0x00, 0xFF}
+	WHITE = color.RGBA{0xFF, 0xFF, 0xFF, 0xFF}
+
 	GREEN  = color.RGBA{0x66, 0xCC, 0x00, 0xFF}
 	PURPLE = color.RGBA{0x33, 0x33, 0xFF, 0xFF}
 )
@@ -90,6 +104,19 @@ func init() {
 	VolatilityRatiosF5 = 0.995
 	VolatilityRatiosF6 = 0.995
 	VolatilityRatiosF12 = 0.98
+
+	AggTradeBigOrderReminder[1] = 1000
+	AggTradeBigOrderReminder[2] = 3000
+	AggTradeBigOrderReminder[3] = 6000
+	AggTradeBigOrderReminder[4] = 10000
+	Order2BigOrderReminder[1] = 2000
+	Order2BigOrderReminder[2] = 10000
+	Order2BigOrderReminder[3] = 35000
+	Order2BigOrderReminder[4] = 100000
+	Order1BigOrderReminder[1] = 1
+	Order1BigOrderReminder[2] = 1
+	Order1BigOrderReminder[3] = 1
+	Order1BigOrderReminder[4] = 1
 }
 
 func GetHotKeyStatus() string {
@@ -104,14 +131,6 @@ func GetTradeMode() string {
 		return "模式一"
 	}
 	return "模式二"
-}
-
-func ReverseTradeMode() {
-	if TradeMode == AllPlusOneSize {
-		TradeMode = FiveAfterMulPoint
-		return
-	}
-	TradeMode = AllPlusOneSize
 }
 
 func ReverseHotKeyStatus() {

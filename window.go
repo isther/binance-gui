@@ -9,6 +9,7 @@ import (
 	"github.com/isther/binanceGui/binance"
 	"github.com/isther/binanceGui/console"
 	"github.com/isther/binanceGui/global"
+	"github.com/isther/binanceGui/orderlist"
 )
 
 var (
@@ -130,6 +131,40 @@ func mainWindow() {
 											giu.Label("撤单清仓卖F12:"),
 											giu.InputFloat(&global.VolatilityRatiosF12).Size(volatilityRatiosInputSize),
 										),
+										giu.Label("大单提醒档位设置"),
+										giu.Row(
+											giu.Label("成交明细: "),
+											giu.Label("一档"),
+											giu.InputInt(&global.AggTradeBigOrderReminder[1]).Size(volatilityRatiosInputSize),
+											giu.Label("二档"),
+											giu.InputInt(&global.AggTradeBigOrderReminder[2]).Size(volatilityRatiosInputSize),
+											giu.Label("三档"),
+											giu.InputInt(&global.AggTradeBigOrderReminder[3]).Size(volatilityRatiosInputSize),
+											giu.Label("四档"),
+											giu.InputInt(&global.AggTradeBigOrderReminder[4]).Size(volatilityRatiosInputSize),
+										),
+										giu.Row(
+											giu.Label("订单簿2: "),
+											giu.Label("一档"),
+											giu.InputInt(&global.Order2BigOrderReminder[1]).Size(volatilityRatiosInputSize),
+											giu.Label("二档"),
+											giu.InputInt(&global.Order2BigOrderReminder[2]).Size(volatilityRatiosInputSize),
+											giu.Label("三档"),
+											giu.InputInt(&global.Order2BigOrderReminder[3]).Size(volatilityRatiosInputSize),
+											giu.Label("四档"),
+											giu.InputInt(&global.Order2BigOrderReminder[4]).Size(volatilityRatiosInputSize),
+										),
+										giu.Row(
+											giu.Label("订单簿1: "),
+											giu.Label("一档"),
+											giu.InputInt(&global.Order1BigOrderReminder[1]).Size(volatilityRatiosInputSize),
+											giu.Label("二档"),
+											giu.InputInt(&global.Order1BigOrderReminder[2]).Size(volatilityRatiosInputSize),
+											giu.Label("三档"),
+											giu.InputInt(&global.Order1BigOrderReminder[3]).Size(volatilityRatiosInputSize),
+											giu.Label("四档"),
+											giu.InputInt(&global.Order1BigOrderReminder[4]).Size(volatilityRatiosInputSize),
+										),
 									),
 								)),
 						),
@@ -137,8 +172,8 @@ func mainWindow() {
 							giu.TabBar().TabItems(
 								giu.TabItem("当前挂单").Layout(
 									giu.SplitLayout(giu.DirectionVertical, 280,
-										giu.Table().Freeze(0, 1).FastMode(true).Size(270, 300).Rows(binance.GetOpenSaleOrdersTable()...),
-										giu.Table().Freeze(0, 1).FastMode(true).Size(270, 300).Rows(binance.GetOpenBuyOrdersTable()...),
+										giu.Table().Freeze(0, 1).FastMode(true).Size(270, 300).Rows(orderlist.GetOpenSaleOrdersTable()...),
+										giu.Table().Freeze(0, 1).FastMode(true).Size(270, 300).Rows(orderlist.GetOpenBuyOrdersTable()...),
 									),
 								),
 							),
@@ -211,7 +246,7 @@ func mainWindow() {
 											SetStyle(giu.StyleVarFramePadding, 10, 10).
 											To(
 												giu.Row(
-													giu.Button("交易模式(Tab): "+global.GetTradeMode()).OnClick(func() { global.ReverseTradeMode() }),
+													giu.Button("交易模式([]): "+global.GetTradeMode()),
 												),
 											),
 										giu.Style().
@@ -220,6 +255,12 @@ func mainWindow() {
 											To(
 												giu.Button("交易热键状态(空格): "+global.GetHotKeyStatus()).OnClick(func() { global.ReverseHotKeyStatus() }),
 											),
+									),
+									giu.Column(
+										giu.Label("快捷键提示:"),
+										giu.Label("F1分仓买入 F2全仓买入 F4取消所有买单"),
+										giu.Label("F5分仓卖出 F6全仓卖出 F8取消所有卖单"),
+										giu.Label("F9取消所有委托 F12取消所有委托并清仓 \\刷新订单列表(请勿频繁刷新)"),
 									),
 								),
 							)),

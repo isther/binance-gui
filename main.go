@@ -10,6 +10,7 @@ import (
 	"github.com/isther/binanceGui/conf"
 	"github.com/isther/binanceGui/console"
 	"github.com/isther/binanceGui/global"
+	"github.com/isther/binanceGui/orderlist"
 )
 
 var (
@@ -40,6 +41,9 @@ func init() {
 	// console
 	go console.ConsoleInstance.Start()
 
+	// start build order list
+	orderlist.StartBuildingOrderListTable()
+
 	plot()
 
 	// start
@@ -69,7 +73,8 @@ func main() {
 	).RegisterKeyboardShortcuts( // 打开关闭热键
 		giu.WindowShortcut{Key: giu.KeySpace, Modifier: giu.ModNone, Callback: func() { global.ReverseHotKeyStatus() }},
 	).RegisterKeyboardShortcuts( // 切换模式一二
-		giu.WindowShortcut{Key: giu.KeyTab, Modifier: giu.ModNone, Callback: func() { global.ReverseTradeMode() }},
+		giu.WindowShortcut{Key: giu.KeyLeftBracket, Modifier: giu.ModNone, Callback: func() { global.TradeMode = global.AllPlusOneSize }},
+		giu.WindowShortcut{Key: giu.KeyRightBracket, Modifier: giu.ModNone, Callback: func() { global.TradeMode = global.FiveAfterMulPoint }},
 	).RegisterKeyboardShortcuts( // 全局买入
 		giu.WindowShortcut{Key: giu.KeyF1, Modifier: giu.ModNone, Callback: func() { go binance.NewGlobalTrader("F1").Trade() }}, //分仓买
 		giu.WindowShortcut{Key: giu.KeyF2, Modifier: giu.ModNone, Callback: func() { go binance.NewGlobalTrader("F2").Trade() }}, //全仓买
@@ -80,6 +85,8 @@ func main() {
 		giu.WindowShortcut{Key: giu.KeyF8, Modifier: giu.ModNone, Callback: func() { go binance.NewGlobalTrader("F8").Trade() }},   // 撤销所有卖单
 		giu.WindowShortcut{Key: giu.KeyF9, Modifier: giu.ModNone, Callback: func() { go binance.NewGlobalTrader("F9").Trade() }},   // 撤销所有单
 		giu.WindowShortcut{Key: giu.KeyF12, Modifier: giu.ModNone, Callback: func() { go binance.NewGlobalTrader("F12").Trade() }}, // 撤销所有单后市价卖出
+	).RegisterKeyboardShortcuts( //刷新订单列表
+		giu.WindowShortcut{Key: giu.KeyBackslash, Modifier: giu.ModNone, Callback: func() { go binance.AccountInstance.UpdateOrderList() }},
 	)
 	app.Run(mainWindow)
 }
@@ -90,6 +97,8 @@ Tab: 切换交易模式
 -: 减少分仓数
 =: 增加分仓数
 Enter: 确认分仓数
+
+刷新订单列表: \ 注: 请勿频繁刷新!
 
 全局下单:
 	F1: 当前市价*波动比 分仓买入

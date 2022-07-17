@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/isther/binanceGui/console"
-	"github.com/isther/binanceGui/global"
+	"github.com/isther/binanceGui/orderlist"
 
 	libBinance "github.com/adshao/go-binance/v2"
 )
@@ -104,6 +104,8 @@ func (account *Account) ExchangeInfo() {
 }
 
 func (account *Account) UpdateOrderList() {
+	orderlist.OrderListInstance.Clear()
+
 	res, err := GetClient().NewListOpenOrdersService().Symbol(account.Symbol).Do(context.Background())
 	if err != nil {
 		console.ConsoleInstance.Write(fmt.Sprintf("Error: %v", err))
@@ -111,7 +113,6 @@ func (account *Account) UpdateOrderList() {
 
 	if len(res) == 0 {
 		console.ConsoleInstance.Write("No open orders")
-		buildC <- struct{}{}
 		return
 	}
 
@@ -122,7 +123,7 @@ func (account *Account) UpdateOrderList() {
 			order.Symbol,
 			order.ClientOrderID,
 		))
-		OpenOrdersInstance.AddOrders(&libBinance.Order{
+		go orderlist.OrderListInstance.AddOrders(&libBinance.Order{
 			ClientOrderID: order.ClientOrderID,
 			Symbol:        order.Symbol,
 			Side:          libBinance.SideType(order.Side),
@@ -148,9 +149,9 @@ func (account *Account) WsUpdateAccount() (chan struct{}, chan struct{}) {
 	}
 
 	wsHandler := func(event *libBinance.WsUserDataEvent) {
-		account.parseAccountUpdate(event.AccountUpdate)
-		account.parseBalanceUpdate(event.BalanceUpdate)
-		account.parseOrderUpdate(event.OrderUpdate)
+		go account.parseAccountUpdate(event.AccountUpdate)
+		go account.parseBalanceUpdate(event.BalanceUpdate)
+		go account.parseOrderUpdate(event.OrderUpdate)
 	}
 	errHandler := func(err error) {
 		console.ConsoleInstance.Write(fmt.Sprintf("Error: %v", err))
@@ -183,12 +184,10 @@ func (account *Account) parseAccountUpdate(accountUpdates []libBinance.WsAccount
 		}
 	}
 
-	if global.Debug {
-		console.ConsoleInstance.Write(fmt.Sprintf("账户余额更新: %v: %v %v %v: %v %v %v: %v %v",
-			account.One.Asset, account.One.Free, account.One.Locked,
-			account.Two.Asset, account.Two.Free, account.Two.Locked,
-			account.BNB.Asset, account.BNB.Free, account.BNB.Locked))
-	}
+	console.ConsoleInstance.Write(fmt.Sprintf("账户余额更新:\n %v: %v %v\n %v: %v %v\n %v: %v %v\n",
+		account.One.Asset, account.One.Free, account.One.Locked,
+		account.Two.Asset, account.Two.Free, account.Two.Locked,
+		account.BNB.Asset, account.BNB.Free, account.BNB.Locked))
 }
 
 func (account *Account) parseBalanceUpdate(balanceUpdate libBinance.WsBalanceUpdate) {
@@ -213,31 +212,25 @@ func (account *Account) parseOrderUpdate(orderUpdate libBinance.WsOrderUpdate) {
 		if orderUpdate.ClientOrderId[0] == 'G' {
 			return
 		}
-		OpenOrdersInstance.AddOrders(&libBinance.Order{
+		orderlist.OrderListInstance.AddOrders(&libBinance.Order{
 			ClientOrderID: orderUpdate.ClientOrderId,
 			Side:          libBinance.SideType(orderUpdate.Side),
 			Price:         orderUpdate.Price,
 			OrigQuantity:  orderUpdate.Volume,
 		})
-
 	} else if orderUpdate.Status == "CANCELED" {
-		console.ConsoleInstance.Write(fmt.Sprintf("[CANCEL] OK, id: %v", orderUpdate.OrigCustomOrderId))
-		if orderUpdate.ClientOrderId[0] == 'G' {
+		console.ConsoleInstance.Write(fmt.Sprintf("[CANCELED] OK, ID: %v", orderUpdate.OrigCustomOrderId))
+		if orderUpdate.OrigCustomOrderId[0] == 'G' {
 			return
 		}
-		OpenOrdersInstance.CancelOrders(&libBinance.Order{
-			Side:          libBinance.SideType(orderUpdate.Side),
-			ClientOrderID: orderUpdate.OrigCustomOrderId,
-		})
+		orderlist.OrderListInstance.CancelOrdersByID(orderUpdate.OrigCustomOrderId)
 	} else if orderUpdate.Status == "FILLED" {
+		console.ConsoleInstance.Write(fmt.Sprintf("[FILLED] OK, ID: %v", orderUpdate.ClientOrderId))
 		if orderUpdate.ClientOrderId[0] == 'G' {
 			return
 		}
-		OpenOrdersInstance.CancelOrders(&libBinance.Order{
-			Side:          libBinance.SideType(orderUpdate.Side),
-			ClientOrderID: orderUpdate.ClientOrderId,
-		})
+		orderlist.OrderListInstance.CancelOrdersByID(orderUpdate.ClientOrderId)
 	} else {
-		console.ConsoleInstance.Write(fmt.Sprintf("%v", orderUpdate))
+		console.ConsoleInstance.Write(fmt.Sprintf("Other order update: %v", orderUpdate))
 	}
 }

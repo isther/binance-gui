@@ -181,6 +181,7 @@ func (g *GlobalTrader) cancelOrderOnBuy() {
 			go g.cancelAOrder(order.ClientOrderID)
 		}
 	}
+	console.ConsoleInstance.Write("取消所有买单")
 }
 
 // 撤掉所有卖单
@@ -190,6 +191,7 @@ func (g *GlobalTrader) cancelOrderOnSale() {
 			go g.cancelAOrder(order.ClientOrderID)
 		}
 	}
+	console.ConsoleInstance.Write("取消所有卖单")
 }
 
 func (g *GlobalTrader) getAllOpenOrders() []*libBinance.Order {
@@ -207,19 +209,25 @@ func (g *GlobalTrader) cancelAllOrder() {
 		console.ConsoleInstance.Write(fmt.Sprintf("Error: %v", err))
 		return
 	}
+	console.ConsoleInstance.Write("取消所有委托")
 }
 
 // 出售所有持仓
 func (g *GlobalTrader) cancelAllOrderAndSellAllPositions() {
 	g.cancelAllOrder()
-	g.createOrderOnFullWarehouse()
+
+	console.ConsoleInstance.Write("清仓")
+	for i := 0; i < 4; i++ {
+		g.createOrderOnFullWarehouse()
+		time.Sleep(200 * time.Millisecond)
+	}
 }
 
 func (g *GlobalTrader) createOrder(price, quantity string) {
 	_, err := GetClient().NewCreateOrderService().Symbol(AccountInstance.Symbol).
 		Side(g.sideType).Type(libBinance.OrderTypeLimit).
 		TimeInForce(libBinance.TimeInForceTypeGTC).Quantity(quantity).
-		Price(price).Do(context.Background())
+		Price(price).NewClientOrderID(g.clientOrderID).Do(context.Background())
 	if err != nil {
 		console.ConsoleInstance.Write(fmt.Sprintf("Error: %v price: %v quantity: %v", err, price, quantity))
 		return
