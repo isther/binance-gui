@@ -96,6 +96,9 @@ func buildHttpDepthBuyTable(res *libBinance.DepthResponse) []*giu.TableRowWidget
 
 	var length = len(strSlice)
 	for i := range strSlice {
+		if length-i > 20 {
+			continue
+		}
 		v := countSet[strSlice[i]]
 		rows = append(rows, giu.TableRow(
 			giu.Style().
@@ -160,6 +163,9 @@ func buildHttpDepthSaleTable(res *libBinance.DepthResponse) []*giu.TableRowWidge
 	})
 
 	for i := range strSlice {
+		if i > 20 {
+			break
+		}
 		v := countSet[strSlice[i]]
 		rows = append(rows, giu.TableRow(
 			giu.Style().

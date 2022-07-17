@@ -209,9 +209,6 @@ func (account *Account) parseOrderUpdate(orderUpdate libBinance.WsOrderUpdate) {
 			orderUpdate.Price,
 			orderUpdate.Volume,
 		))
-		if orderUpdate.ClientOrderId[0] == 'G' {
-			return
-		}
 		orderlist.OrderListInstance.AddOrders(&libBinance.Order{
 			ClientOrderID: orderUpdate.ClientOrderId,
 			Side:          libBinance.SideType(orderUpdate.Side),
@@ -220,15 +217,9 @@ func (account *Account) parseOrderUpdate(orderUpdate libBinance.WsOrderUpdate) {
 		})
 	} else if orderUpdate.Status == "CANCELED" {
 		console.ConsoleInstance.Write(fmt.Sprintf("[CANCELED] OK, ID: %v", orderUpdate.OrigCustomOrderId))
-		if orderUpdate.OrigCustomOrderId[0] == 'G' {
-			return
-		}
 		orderlist.OrderListInstance.CancelOrdersByID(orderUpdate.OrigCustomOrderId)
 	} else if orderUpdate.Status == "FILLED" {
 		console.ConsoleInstance.Write(fmt.Sprintf("[FILLED] OK, ID: %v", orderUpdate.ClientOrderId))
-		if orderUpdate.ClientOrderId[0] == 'G' {
-			return
-		}
 		orderlist.OrderListInstance.CancelOrdersByID(orderUpdate.ClientOrderId)
 	} else {
 		console.ConsoleInstance.Write(fmt.Sprintf("Other order update: %v", orderUpdate))
