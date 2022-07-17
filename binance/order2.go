@@ -13,7 +13,7 @@ import (
 
 var (
 	globalWsPartialDepthServer = make(chan *libBinance.WsPartialDepthEvent)
-	depthTable                 *libBinance.WsPartialDepthEvent
+	wsDepthTable               *libBinance.WsPartialDepthEvent
 
 	wsPartialDepthTable []*giu.TableRowWidget
 )
@@ -40,7 +40,6 @@ func runOneWsPartialDepth() (chan struct{}, chan struct{}) {
 	)
 
 	wsDepthHandler := func(event *libBinance.WsPartialDepthEvent) {
-		depthTable = event
 		globalWsPartialDepthServer <- event
 	}
 

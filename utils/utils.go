@@ -6,6 +6,43 @@ import (
 	"strings"
 )
 
+func Float64ToStringLen3(f float64) string {
+	var s = fmt.Sprintf("%.8f", f)
+	if f >= 1.0 {
+		if f >= 100.0 {
+			s = s[:3]
+		} else {
+			s = s[:4]
+		}
+	} else {
+		for i := 0; i < len(s); i++ {
+			if s[i] == '.' {
+				continue
+			}
+
+			if s[i] != '0' {
+				if i+3 <= len(s) {
+					s = s[:i+3]
+				}
+				break
+			}
+
+		}
+
+		var pos = len(s) - 1
+		for ; pos > 0; pos-- {
+			if s[pos] != '0' {
+				break
+			}
+		}
+		s = s[:pos+1]
+	}
+	if s[len(s)-1] == '.' {
+		s = s[:len(s)-1]
+	}
+	return s
+}
+
 func correction(val float64, size string) string {
 	var (
 		oneIdx    = strings.Index(size, "1")

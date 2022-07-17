@@ -48,9 +48,14 @@ func init() {
 
 	// start
 	go binance.StartWebSocketStream()
+	binance.StartHttpDepthTable()
 }
 
 func main() {
+	runGUI()
+}
+
+func runGUI() {
 	if conf.Conf.Pprof {
 		pprof()
 	}

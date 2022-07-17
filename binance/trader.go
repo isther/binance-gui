@@ -92,7 +92,7 @@ func (t *Trader) createOrderOnFullWarehouse() {
 		)
 		if global.TradeMode == global.AllPlusOneSize || t.tableID < 5 {
 			//模式一: 按键价格+1步进
-			price, _ = strconv.ParseFloat(depthTable.Bids[t.tableID].Price, 64)
+			price, _ = strconv.ParseFloat(wsDepthTable.Bids[t.tableID].Price, 64)
 			price = t.pricePlusTickSize(price)
 		} else {
 			//模式二: 前五档按照按键价格加一步进, 六到二十当前市价*对应波动比 -- global.VolatilityRatiosBuy global.VolatilityRatiosSale
@@ -114,7 +114,7 @@ func (t *Trader) createOrderOnFullWarehouse() {
 		)
 		if global.TradeMode == global.AllPlusOneSize || t.tableID < 5 {
 			//模式一: 按键价格-1步进
-			price, _ = strconv.ParseFloat(depthTable.Asks[t.tableID].Price, 64)
+			price, _ = strconv.ParseFloat(wsDepthTable.Asks[t.tableID].Price, 64)
 			price = t.priceSubTickSize(price)
 		} else {
 			price, _ = strconv.ParseFloat(AggTradePrice, 64)
@@ -162,7 +162,7 @@ func (t *Trader) createOrderOnSubWarehouse() {
 		)
 		if global.TradeMode == global.AllPlusOneSize || t.tableID < 5 {
 			//模式一: 按键价格加一步进
-			price, _ = strconv.ParseFloat(depthTable.Bids[t.tableID].Price, 64)
+			price, _ = strconv.ParseFloat(wsDepthTable.Bids[t.tableID].Price, 64)
 			price = t.pricePlusTickSize(price)
 		} else {
 			//模式二: 前五档按照按键价格加一步进, 六到二十当前市价*对应波动比 -- global.VolatilityRatiosBuy global.VolatilityRatiosSale
@@ -184,7 +184,7 @@ func (t *Trader) createOrderOnSubWarehouse() {
 		)
 		if global.TradeMode == global.AllPlusOneSize || t.tableID < 5 {
 			//模式一: 按键价格减一步进
-			price, _ = strconv.ParseFloat(depthTable.Asks[t.tableID].Price, 64)
+			price, _ = strconv.ParseFloat(wsDepthTable.Asks[t.tableID].Price, 64)
 			price = t.priceSubTickSize(price)
 		} else {
 			//模式二: 前五档按照按键价格加一步进, 六到二十当前市价*对应波动比 -- global.VolatilityRatiosBuy global.VolatilityRatiosSale

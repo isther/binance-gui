@@ -113,10 +113,10 @@ func init() {
 	Order2BigOrderReminder[2] = 10000
 	Order2BigOrderReminder[3] = 35000
 	Order2BigOrderReminder[4] = 100000
-	Order1BigOrderReminder[1] = 1
-	Order1BigOrderReminder[2] = 1
-	Order1BigOrderReminder[3] = 1
-	Order1BigOrderReminder[4] = 1
+	Order1BigOrderReminder[1] = 10000
+	Order1BigOrderReminder[2] = 30000
+	Order1BigOrderReminder[3] = 50000
+	Order1BigOrderReminder[4] = 100000
 }
 
 func GetHotKeyStatus() string {

@@ -279,7 +279,14 @@ func mainWindow() {
 							),
 						),
 					),
-					giu.TabBar().TabItems(giu.TabItem("订单簿1").Layout()),
+					giu.TabBar().TabItems(giu.TabItem("订单簿1").Layout(
+						// giu.Column(
+						giu.SplitLayout(giu.DirectionVertical, 500,
+							giu.Table().FastMode(true).Rows(binance.GetHttpDepthBuyTable()...),
+							giu.Table().FastMode(true).Rows(binance.GetHttpDepthSaleTable()...),
+						),
+						// ),
+					)),
 				),
 			),
 		)
