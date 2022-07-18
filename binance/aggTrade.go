@@ -69,6 +69,10 @@ func buildAggTradeTable() []*giu.TableRowWidget {
 		console.ConsoleInstance.Write(fmt.Sprintf("Error: %v", err))
 	}
 
+	if global.IsShieldSmallOrder && price*quantity < 1000 {
+		return wsAggTradeTable
+	}
+
 	eColor := global.GREEN
 	if aggTradeNew.IsBuyerMaker {
 		eColor = global.RED

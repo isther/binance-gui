@@ -142,6 +142,8 @@ func mainWindow() {
 											giu.InputInt(&global.AggTradeBigOrderReminder[3]).Size(volatilityRatiosInputSize),
 											giu.Label("四档"),
 											giu.InputInt(&global.AggTradeBigOrderReminder[4]).Size(volatilityRatiosInputSize),
+											giu.Label("是否屏蔽小单:"),
+											giu.Checkbox("", &global.IsShieldSmallOrder),
 										),
 										giu.Row(
 											giu.Label("订单簿2: "),
@@ -229,6 +231,7 @@ func mainWindow() {
 									giu.Row(
 										giu.Label("分仓数: "),
 										giu.InputInt(&global.Average).Size(240),
+										giu.Button("确定(Enter)").OnClick(binance.UpdateAverageAmount),
 									),
 									giu.Style().
 										SetColor(giu.StyleColorBorder, global.BLUE).

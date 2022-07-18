@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"image/color"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -57,16 +58,24 @@ func getDepth() *libBinance.DepthResponse {
 
 func buildHttpDepthBuyTable(res *libBinance.DepthResponse) []*giu.TableRowWidget {
 	var (
-		rows     []*giu.TableRowWidget
+		rows     = make([]*giu.TableRowWidget, 21)
 		strSlice []string
 		countSet = make(map[string]float64)
 	)
 
-	rows = append(rows, giu.TableRow(
+	rows[0] = giu.TableRow(
 		giu.Label("标号"),
 		giu.Label("价格"),
 		giu.Label("成交额"),
-	).BgColor(global.PURPLE))
+	).BgColor(global.PURPLE)
+
+	for i := 1; i < 21; i++ {
+		rows[i] = giu.TableRow(
+			giu.Label(""),
+			giu.Label(""),
+			giu.Label(""),
+		)
+	}
 
 	if res == nil {
 		return rows
@@ -88,23 +97,25 @@ func buildHttpDepthBuyTable(res *libBinance.DepthResponse) []*giu.TableRowWidget
 	sort.SliceStable(strSlice, func(i, j int) bool {
 		var res = strings.Compare(strSlice[i], strSlice[j])
 		if res == -1 {
-			return false
-		} else {
 			return true
+		} else {
+			return false
 		}
 	})
 
-	var length = len(strSlice)
 	for i := range strSlice {
-		if length-i > 20 {
-			continue
+		if i >= 20 {
+			break
 		}
 		v := countSet[strSlice[i]]
-		rows = append(rows, giu.TableRow(
+		price, _ := strconv.ParseFloat(strSlice[i], 64)
+		aggTradePrice, _ := strconv.ParseFloat(AggTradePrice, 64)
+		rows[20-i] = giu.TableRow(
 			giu.Style().
 				SetFontSize(global.Order2FontSize).
+				SetColor(giu.StyleColorText, global.RED).
 				To(
-					giu.Label(fmt.Sprintf("%d", length-i)),
+					giu.Label(fmt.Sprintf("%.2f%%", price/aggTradePrice*100.0-100)),
 				),
 			giu.Style().
 				SetFontSize(global.Order2FontSize).
@@ -118,7 +129,7 @@ func buildHttpDepthBuyTable(res *libBinance.DepthResponse) []*giu.TableRowWidget
 				To(
 					giu.Label(fmt.Sprintf("%.2fK", v)),
 				),
-		))
+		)
 	}
 	return rows
 }
@@ -167,11 +178,14 @@ func buildHttpDepthSaleTable(res *libBinance.DepthResponse) []*giu.TableRowWidge
 			break
 		}
 		v := countSet[strSlice[i]]
+		price, _ := strconv.ParseFloat(strSlice[i], 64)
+		aggTradePrice, _ := strconv.ParseFloat(AggTradePrice, 64)
 		rows = append(rows, giu.TableRow(
 			giu.Style().
 				SetFontSize(global.Order2FontSize).
+				SetColor(giu.StyleColorText, global.GREEN).
 				To(
-					giu.Label(fmt.Sprintf("%d", i+1)),
+					giu.Label(fmt.Sprintf("%.2f%%", price/aggTradePrice*100.0-100)),
 				),
 			giu.Style().
 				SetFontSize(global.Order2FontSize).

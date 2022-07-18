@@ -82,6 +82,11 @@ func buildWsPartialDepthTable() []*giu.TableRowWidget {
 	}
 
 	for i := range eventNew.Asks {
+		var bgColor color.RGBA = global.WHITE
+		if (i)%5 == 0 {
+			bgColor = global.Order2Bg
+		}
+
 		price, quantity, err := eventNew.Asks[i].Parse()
 		if err != nil {
 			console.ConsoleInstance.Write(fmt.Sprintf("Error: %v", err))
@@ -89,6 +94,7 @@ func buildWsPartialDepthTable() []*giu.TableRowWidget {
 		rows[length-i-1] = giu.TableRow(
 			giu.Style().
 				SetFontSize(global.Order2FontSize).
+				SetColor(giu.StyleColorText, bgColor).
 				To(
 					giu.Label(fmt.Sprintf("%c", hotkey.HotKeySale[i])),
 				),
@@ -110,9 +116,11 @@ func buildWsPartialDepthTable() []*giu.TableRowWidget {
 		if err != nil {
 			console.ConsoleInstance.Write(fmt.Sprintf("Error: %v", err))
 		}
+
 		rows[length+i+1] = giu.TableRow(
 			giu.Style().
 				SetFontSize(global.Order2FontSize).
+				SetColor(giu.StyleColorText, bgColor).
 				To(
 					giu.Label(fmt.Sprintf("%c", hotkey.HotKeyBuy[i])),
 				),
