@@ -13,6 +13,7 @@ func StartWebSocketStream() {
 		wsUpdateAccountDoneC chan struct{}
 		wsUpdateAccountStopC chan struct{}
 	)
+	updateTime()
 
 	go func() {
 		for {

@@ -280,6 +280,7 @@ func mainWindow() {
 										SetStyle(giu.StyleVarFramePadding, 10, 10).
 										To(
 											giu.Button("交易热键状态(空格): "+global.GetHotKeyStatus()).OnClick(func() { global.ReverseHotKeyStatus() }),
+											giu.Button("币安系统时间: "+binance.TimeString),
 										),
 								),
 							)),
@@ -287,23 +288,6 @@ func mainWindow() {
 					),
 				),
 			),
-
-			// giu.SplitLayout(giu.DirectionHorizontal, 1350, //H
-			// 	giu.SplitLayout(giu.DirectionVertical, 600, //V
-			// 		giu.SplitLayout(giu.DirectionHorizontal, 750, //H
-
-			// 			),
-
-			// 		),
-			// 		giu.TabBar().TabItems(
-
-			// 			giu.TabItem("历史订单").Layout(),
-			// 		),
-			// 	),
-			// 	giu.SplitLayout(giu.DirectionHorizontal, 300, //H
-			//
-			// ),
-			// ),
 		)
 }
 

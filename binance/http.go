@@ -17,14 +17,6 @@ func GetClient() *libBinance.Client {
 	return libBinance.NewClient(conf.Conf.ApiKey, conf.Conf.SecretKey)
 }
 
-func GetSystemTime() {
-	timestamp, err := GetClient().NewServerTimeService().Do(context.Background())
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(timestamp)
-}
-
 func GetAll() {
 	info, err := GetClient().NewGetAllCoinsInfoService().Do(context.Background())
 	if err != nil {
