@@ -31,7 +31,6 @@ func StartWebSocketStream() {
 	wsAggTradeServerDoneC, wsAggTradeServerStopC = runOneAggTradeDepth()
 	wsUpdateAccountDoneC, wsUpdateAccountStopC = AccountInstance.WsUpdateAccount()
 	StartUpdateAccount()
-	UpdateAverageAmount()
 	for {
 		select {
 		case symbol := <-global.FreshC:
@@ -59,7 +58,6 @@ func StartWebSocketStream() {
 			}()
 
 			StartUpdateAccount()
-			// UpdateAverageAmount()
 		}
 	}
 }

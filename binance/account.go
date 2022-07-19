@@ -42,6 +42,8 @@ func StartUpdateAccount() {
 	AccountInstance.ExchangeInfo()
 	AccountInstance.UpdateAccount()
 	AccountInstance.UpdateOrderList()
+
+	UpdateAverageAmount()
 }
 
 func NewAccount() *Account {

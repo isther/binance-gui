@@ -7,7 +7,7 @@ var (
 	Debug = false
 
 	// 分仓参数
-	Average              int32 = 10
+	Average              int32 = 7
 	AverageSymbol1Amount float64
 	AverageSymbol2Amount float64
 
