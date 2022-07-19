@@ -3,6 +3,7 @@ package binance
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/isther/binanceGui/console"
 	"github.com/isther/binanceGui/orderlist"
@@ -46,6 +47,8 @@ func StartUpdateAccount() {
 	UpdateAverageAmount()
 
 	updateTradeHistory()
+
+	ResetCostInstance()
 }
 
 func NewAccount() *Account {
@@ -226,20 +229,43 @@ func (account *Account) parseOrderUpdate(orderUpdate libBinance.WsOrderUpdate) {
 		console.ConsoleInstance.Write(fmt.Sprintf("[FILLED] OK, ID: %v", orderUpdate.ClientOrderId))
 		orderlist.OrderListInstance.CancelOrdersByID(orderUpdate.ClientOrderId)
 
-		var isBuyer bool
-		if libBinance.SideType(orderUpdate.Side) == libBinance.SideTypeBuy {
-			isBuyer = true
-		} else {
-			isBuyer = false
+		{ //history table
+			var isBuyer bool
+			if libBinance.SideType(orderUpdate.Side) == libBinance.SideTypeBuy {
+				isBuyer = true
+			} else {
+				isBuyer = false
+			}
+			globalHistoryC <- &libBinance.TradeV3{
+				IsBuyer:         isBuyer,
+				Time:            orderUpdate.TransactionTime,
+				Symbol:          orderUpdate.Symbol,
+				Price:           orderUpdate.Price,
+				QuoteQuantity:   orderUpdate.FilledQuoteVolume,
+				Commission:      orderUpdate.FeeCost,
+				CommissionAsset: orderUpdate.FeeAsset,
+			}
 		}
-		globalHistoryC <- &libBinance.TradeV3{
-			IsBuyer:         isBuyer,
-			Time:            orderUpdate.TransactionTime,
-			Symbol:          orderUpdate.Symbol,
-			Price:           orderUpdate.Price,
-			QuoteQuantity:   orderUpdate.FilledQuoteVolume,
-			Commission:      orderUpdate.FeeCost,
-			CommissionAsset: orderUpdate.FeeAsset,
+
+		{ // average cost
+			quantity, _ := strconv.ParseFloat(orderUpdate.LatestVolume, 64)
+			price, _ := strconv.ParseFloat(orderUpdate.LatestPrice, 64)
+			if libBinance.SideType(orderUpdate.Side) == libBinance.SideTypeBuy {
+				CostInstance.Buy(quantity, price)
+			} else {
+				CostInstance.Sale(quantity, price)
+			}
+		}
+	} else if orderUpdate.Status == "PARTIALLY_FILLED" {
+		console.ConsoleInstance.Write(fmt.Sprintf("[PARTIALLY_TRADE] OK, ID: %v", orderUpdate.ClientOrderId))
+		{ // average cost
+			quantity, _ := strconv.ParseFloat(orderUpdate.LatestVolume, 64)
+			price, _ := strconv.ParseFloat(orderUpdate.LatestPrice, 64)
+			if libBinance.SideType(orderUpdate.Side) == libBinance.SideTypeBuy {
+				CostInstance.Buy(quantity, price)
+			} else {
+				CostInstance.Sale(quantity, price)
+			}
 		}
 	} else {
 		console.ConsoleInstance.Write(fmt.Sprintf("Other order update: %v", orderUpdate))

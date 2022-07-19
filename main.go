@@ -93,6 +93,8 @@ func runGUI() {
 		giu.WindowShortcut{Key: giu.KeyF12, Modifier: giu.ModNone, Callback: func() { go binance.NewGlobalTrader("F12").Trade() }}, // 撤销所有单后市价卖出
 	).RegisterKeyboardShortcuts( //刷新订单列表
 		giu.WindowShortcut{Key: giu.KeyBackslash, Modifier: giu.ModNone, Callback: func() { go binance.AccountInstance.UpdateOrderList() }},
+	).RegisterKeyboardShortcuts( //持仓成本复位
+		giu.WindowShortcut{Key: giu.KeyApostrophe, Modifier: giu.ModNone, Callback: func() { binance.ResetCostInstance() }},
 	)
 	app.Run(mainWindow)
 }
