@@ -47,6 +47,7 @@ func init() {
 	plot()
 
 	// start
+	go ping()
 	go binance.StartWebSocketStream()
 	binance.StartHttpDepthTable()
 }

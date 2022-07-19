@@ -268,8 +268,9 @@ func mainWindow() {
 											SetColor(giu.StyleColorBorder, global.BLUE).
 											SetStyle(giu.StyleVarFramePadding, 10, 10).
 											To(
-												giu.Row(
+												giu.Column(
 													giu.Button("交易模式([]): "+global.GetTradeMode()),
+													giu.Button("服务器延迟: "+global.Ping),
 												),
 											),
 									),
@@ -284,8 +285,10 @@ func mainWindow() {
 										SetColor(giu.StyleColorBorder, global.HotKeyColor).
 										SetStyle(giu.StyleVarFramePadding, 10, 10).
 										To(
-											giu.Button("交易热键状态(空格): "+global.GetHotKeyStatus()).OnClick(func() { global.ReverseHotKeyStatus() }),
-											giu.Button("币安系统时间: "+binance.TimeString),
+											giu.Column(
+												giu.Button("交易热键状态(空格): "+global.GetHotKeyStatus()).OnClick(func() { global.ReverseHotKeyStatus() }),
+												giu.Button("币安系统时间: "+binance.TimeString),
+											),
 										),
 								),
 							)),

@@ -120,9 +120,9 @@ func pprof() {
 }
 
 func ping() {
-	ticker := time.NewTicker(10 * time.Second)
+	ticker := time.NewTicker(5 * time.Second)
 	for {
-		timeOutContext, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		timeOutContext, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		defer cancel()
 
 		start := time.Now()
@@ -131,7 +131,7 @@ func ping() {
 		if err != nil {
 			global.Ping = "999ms"
 		}
-		global.Ping = fmt.Sprintf("%vms", end.Sub(start))
+		global.Ping = fmt.Sprintf("%v", end.Sub(start))
 		<-ticker.C
 	}
 }

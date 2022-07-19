@@ -35,6 +35,8 @@ func runOneAggTradeDepth() (chan struct{}, chan struct{}) {
 		AggTradePrice = priceFloat648Point(event.Price)
 		if !event.IsBuyerMaker {
 			AggTradePriceColor = global.GREEN
+		} else {
+			AggTradePriceColor = global.RED
 		}
 		globalWsAggTradeServerC <- event
 	}
