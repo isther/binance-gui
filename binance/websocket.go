@@ -27,6 +27,12 @@ func StartWebSocketStream() {
 		}
 	}()
 
+	go func() {
+		for {
+			historyTable = buildHistoryTable()
+		}
+	}()
+
 	wsPartialDepthServerDoneC, wsPartialDepthServerStopC = runOneWsPartialDepth()
 	wsAggTradeServerDoneC, wsAggTradeServerStopC = runOneAggTradeDepth()
 	wsUpdateAccountDoneC, wsUpdateAccountStopC = AccountInstance.WsUpdateAccount()

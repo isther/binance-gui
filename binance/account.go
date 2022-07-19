@@ -44,6 +44,8 @@ func StartUpdateAccount() {
 	AccountInstance.UpdateOrderList()
 
 	UpdateAverageAmount()
+
+	updateTradeHistory()
 }
 
 func NewAccount() *Account {
@@ -223,6 +225,22 @@ func (account *Account) parseOrderUpdate(orderUpdate libBinance.WsOrderUpdate) {
 	} else if orderUpdate.Status == "FILLED" {
 		console.ConsoleInstance.Write(fmt.Sprintf("[FILLED] OK, ID: %v", orderUpdate.ClientOrderId))
 		orderlist.OrderListInstance.CancelOrdersByID(orderUpdate.ClientOrderId)
+
+		var isBuyer bool
+		if libBinance.SideType(orderUpdate.Side) == libBinance.SideTypeBuy {
+			isBuyer = true
+		} else {
+			isBuyer = false
+		}
+		globalHistoryC <- &libBinance.TradeV3{
+			IsBuyer:         isBuyer,
+			Time:            orderUpdate.TransactionTime,
+			Symbol:          orderUpdate.Symbol,
+			Price:           orderUpdate.Price,
+			QuoteQuantity:   orderUpdate.FilledQuoteVolume,
+			Commission:      orderUpdate.FeeCost,
+			CommissionAsset: orderUpdate.FeeAsset,
+		}
 	} else {
 		console.ConsoleInstance.Write(fmt.Sprintf("Other order update: %v", orderUpdate))
 	}

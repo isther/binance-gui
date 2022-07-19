@@ -171,7 +171,9 @@ func mainWindow() {
 							)),
 					),
 					giu.TabBar().TabItems(
-						giu.TabItem("历史订单"),
+						giu.TabItem("历史订单").Layout(
+							giu.Table().Freeze(0, 1).FastMode(true).Rows(binance.GetHistoryTable()...),
+						),
 					),
 				),
 				giu.SplitLayout(giu.DirectionHorizontal, 300,
