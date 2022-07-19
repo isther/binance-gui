@@ -2,8 +2,9 @@ package binance
 
 import (
 	"context"
-	"fmt"
 	"time"
+
+	"github.com/isther/binanceGui/console"
 )
 
 var (
@@ -12,7 +13,7 @@ var (
 
 func updateTime() {
 	go func() {
-		fmt.Println("New http request to get system time of binance")
+		console.ConsoleInstance.Write("New http request to get system time of binance")
 		var (
 			ticker = time.NewTicker(1 * time.Second)
 		)

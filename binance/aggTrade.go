@@ -16,7 +16,8 @@ var (
 	globalWsAggTradeServerC = make(chan *libBinance.WsAggTradeEvent)
 	wsAggTradeTable         []*giu.TableRowWidget
 
-	AggTradePrice string
+	AggTradePrice      string
+	AggTradePriceColor color.Color = global.RED
 )
 
 func GetWsAggTradeTable() []*giu.TableRowWidget {
@@ -32,6 +33,9 @@ func runOneAggTradeDepth() (chan struct{}, chan struct{}) {
 
 	wsAggTradeHandler := func(event *libBinance.WsAggTradeEvent) {
 		AggTradePrice = priceFloat648Point(event.Price)
+		if !event.IsBuyerMaker {
+			AggTradePriceColor = global.GREEN
+		}
 		globalWsAggTradeServerC <- event
 	}
 

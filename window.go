@@ -257,7 +257,12 @@ func mainWindow() {
 								giu.TabItem("订单簿2").Layout(
 									giu.Column(
 										giu.Table().FastMode(true).Size(270, 420).Rows(binance.GetWsPartialDepthBuyTable()...),
-										giu.Label(fmt.Sprintf("实时价格: %s", binance.AggTradePrice)),
+										giu.Style().
+											SetColor(giu.StyleColorText, binance.AggTradePriceColor).
+											To(
+												giu.Label(fmt.Sprintf("实时价格: %s", binance.AggTradePrice)),
+											),
+
 										giu.Table().FastMode(true).Size(270, 420).Rows(binance.GetWsPartialDepthSaleTable()...),
 										giu.Style().
 											SetColor(giu.StyleColorBorder, global.BLUE).
