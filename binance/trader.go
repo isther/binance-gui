@@ -44,6 +44,18 @@ func NewTrader(mode giu.Modifier, key string) *Trader {
 		tableID = id
 		sideType = libBinance.SideTypeSell
 	}
+
+	switch key {
+	case ";":
+		key = "Semicolon"
+	case ",":
+		key = "Comma"
+	case ".":
+		key = "Period"
+	case "/":
+		key = "Slash"
+	}
+
 	return &Trader{
 		mode:          mode,
 		clientOrderID: fmt.Sprintf("%d%s", time.Now().UnixNano(), key),

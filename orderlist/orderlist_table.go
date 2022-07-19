@@ -56,7 +56,7 @@ func buildOpenBuyOrderTable() []*giu.TableRowWidget {
 		price, _ := strconv.ParseFloat(order.Price, 64)
 		quantity, _ := strconv.ParseFloat(order.OrigQuantity, 64)
 		rows = append(rows, giu.TableRow(
-			giu.Label(fmt.Sprintf("%s", parseOrderID(order.ClientOrderID))),
+			giu.Label(fmt.Sprintf("%s", parseOrderIDToKey(order.ClientOrderID))),
 			giu.Label(fmt.Sprintf("%v", priceFloat648Point(order.Price))),
 			giu.Style().
 				SetColor(giu.StyleColorText, global.GREEN).
@@ -86,7 +86,7 @@ func buildOpenSaleOrderTable() []*giu.TableRowWidget {
 		price, _ := strconv.ParseFloat(order.Price, 64)
 		quantity, _ := strconv.ParseFloat(order.OrigQuantity, 64)
 		rows = append(rows, giu.TableRow(
-			giu.Label(fmt.Sprintf("%s", parseOrderID(order.ClientOrderID))),
+			giu.Label(fmt.Sprintf("%s", parseOrderIDToKey(order.ClientOrderID))),
 			giu.Label(fmt.Sprintf("%v", priceFloat648Point(order.Price))),
 			giu.Style().
 				SetColor(giu.StyleColorText, global.RED).

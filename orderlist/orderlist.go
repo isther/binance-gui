@@ -39,7 +39,7 @@ func (orderList *OrderList) Unlock() {
 
 // Add order to order list
 func (orderList *OrderList) AddOrders(order *libBinance.Order) {
-	key := parseOrderID(order.ClientOrderID)
+	key := parseOrderIDToKey(order.ClientOrderID)
 	if order.Side == libBinance.SideTypeBuy {
 		orderList.checkBuyOrderIsExistIfNotToMake(key)
 		orderList.mu.Lock()
@@ -64,6 +64,7 @@ func (orderList *OrderList) GetOrders(key string) []*libBinance.Order {
 		sideType = orderList.getKeyType(key)
 	)
 
+	key = keyToSymbol(key)
 	if sideType == libBinance.SideTypeBuy {
 		return orderList.BuyOrders[key]
 	} else if sideType == libBinance.SideTypeSell {
@@ -108,7 +109,7 @@ func (orderList *OrderList) cancelOrderByID(orderID string) {
 	defer orderList.mu.Unlock()
 
 	var (
-		key      = parseOrderID(orderID)
+		key      = parseOrderIDToKey(orderID)
 		sideType = orderList.getKeyType(key)
 	)
 
@@ -157,8 +158,23 @@ func (orderList *OrderList) OutPutSaleOrders() []*libBinance.Order {
 	return saleOrders
 }
 
-func parseOrderID(clientOrderID string) string {
-	return clientOrderID[19:]
+func parseOrderIDToKey(clientOrderID string) string {
+	return keyToSymbol(clientOrderID[19:])
+}
+
+func keyToSymbol(key string) string {
+	switch key {
+	case "Semicolon":
+		return ";"
+	case "Comma":
+		return ","
+	case "Period":
+		return "."
+	case "Slash":
+		return "/"
+	default:
+		return key
+	}
 }
 
 func (orderList *OrderList) getKeyType(key string) libBinance.SideType {
@@ -173,6 +189,8 @@ func (orderList *OrderList) getKeyType(key string) libBinance.SideType {
 		case "F5", "F6":
 			sideType = libBinance.SideTypeSell
 		case "F12":
+			sideType = libBinance.SideTypeSell
+		case "Semicolon", "Comma", "Period", "Slash":
 			sideType = libBinance.SideTypeSell
 		}
 	} else {
