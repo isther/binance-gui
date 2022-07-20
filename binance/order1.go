@@ -151,8 +151,8 @@ func buildHttpDepthSaleTable(res *libBinance.DepthResponse) []*giu.TableRowWidge
 		return rows
 	}
 
-	for i := range res.Asks {
-		price, quantity, err := res.Asks[i].Parse()
+	for i := range res.Bids {
+		price, quantity, err := res.Bids[i].Parse()
 		if err != nil {
 			console.ConsoleInstance.Write(fmt.Sprintf("Error: %v", err))
 		}
