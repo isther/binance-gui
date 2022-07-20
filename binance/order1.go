@@ -64,9 +64,9 @@ func buildHttpDepthBuyTable(res *libBinance.DepthResponse) []*giu.TableRowWidget
 	)
 
 	rows[0] = giu.TableRow(
-		giu.Label("涨跌幅度"),
-		giu.Label("价格"),
-		giu.Label("成交额"),
+		giu.Label("PriceChangePercent"),
+		giu.Label("Price"),
+		giu.Label("TurnOver"),
 	).BgColor(global.PURPLE)
 
 	for i := 1; i < 21; i++ {
@@ -142,9 +142,9 @@ func buildHttpDepthSaleTable(res *libBinance.DepthResponse) []*giu.TableRowWidge
 	)
 
 	rows = append(rows, giu.TableRow(
-		giu.Label("涨跌幅度"),
-		giu.Label("价格"),
-		giu.Label("成交额"),
+		giu.Label("PriceChangePercent"),
+		giu.Label("Price"),
+		giu.Label("TurnOver"),
 	).BgColor(global.PURPLE))
 
 	if res == nil {

@@ -61,9 +61,9 @@ func buildAggTradeTable() []*giu.TableRowWidget {
 	)
 
 	rows = append(rows, giu.TableRow(
-		giu.Label("时间"),
-		giu.Label("价格"),
-		giu.Label("成交额"),
+		giu.Label("Time"),
+		giu.Label("Price"),
+		giu.Label("TurnOver"),
 	).BgColor(global.PURPLE))
 
 	price, err := strconv.ParseFloat(aggTradeNew.Price, 64)

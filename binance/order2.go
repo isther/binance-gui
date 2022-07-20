@@ -66,15 +66,15 @@ func buildWsPartialDepthTable() []*giu.TableRowWidget {
 	rows := make([]*giu.TableRowWidget, length*2)
 
 	rows[0] = giu.TableRow(
-		giu.Label("快捷键"),
-		giu.Label("价格"),
-		giu.Label("成交额"),
+		giu.Label("HotKey"),
+		giu.Label("Price"),
+		giu.Label("TurnOver"),
 	).BgColor(global.PURPLE)
 
 	rows[21] = giu.TableRow(
-		giu.Label("快捷键"),
-		giu.Label("价格"),
-		giu.Label("成交额"),
+		giu.Label("HotKey"),
+		giu.Label("Price"),
+		giu.Label("TurnOver"),
 	).BgColor(global.PURPLE)
 
 	if eventNew == nil {

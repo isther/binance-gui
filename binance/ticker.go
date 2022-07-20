@@ -189,11 +189,11 @@ func buildTickerTable() ([]*giu.TableRowWidget, []*giu.TableRowWidget, []*giu.Ta
 				sortTypeNow = sortByAssetDescend
 				updateTableC <- struct{}{}
 			}),
-			giu.Selectable("24h成交额").Selected(false).OnDClick(func() {
+			giu.Selectable("24hr TurnOver").Selected(false).OnDClick(func() {
 				sortTypeNow = sortByTurnOverDescend
 				updateTableC <- struct{}{}
 			}),
-			giu.Selectable("涨幅").Selected(false).OnDClick(func() {
+			giu.Selectable("PriceChangePercent").Selected(false).OnDClick(func() {
 				sortTypeNow = sortByPercentageDescend
 				updateTableC <- struct{}{}
 			}),

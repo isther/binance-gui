@@ -29,11 +29,11 @@ func buildHistoryTable() []*giu.TableRowWidget {
 	)
 
 	rows = append(rows, giu.TableRow(
-		giu.Label("时间"),
-		giu.Label("交易对"),
-		giu.Label("成交均价"),
-		giu.Label("成交额"),
-		giu.Label("手续费"),
+		giu.Label("Time"),
+		giu.Label("Symbol"),
+		giu.Label("AveragePrice"),
+		giu.Label("TurnOver"),
+		giu.Label("Fee"),
 	).BgColor(global.PURPLE))
 
 	eColor := global.RED
@@ -48,7 +48,7 @@ func buildHistoryTable() []*giu.TableRowWidget {
 
 	now := parseTimeStampMs(historyNew.Time)
 	rows = append(rows, giu.TableRow(
-		giu.Label(fmt.Sprintf("%2d日 %v:%v:%v", now.Day(), now.Hour(), now.Minute(), now.Second())),
+		giu.Label(fmt.Sprintf("%2dth %v:%v:%v", now.Day(), now.Hour(), now.Minute(), now.Second())),
 		giu.Label(fmt.Sprintf("%v", historyNew.Symbol)),
 		giu.Style().SetColor(giu.StyleColorText, eColor).To(
 			giu.Label(fmt.Sprintf("%v", historyNew.Price)),

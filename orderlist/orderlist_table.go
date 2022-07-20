@@ -45,9 +45,9 @@ func buildOpenBuyOrderTable() []*giu.TableRowWidget {
 	)
 
 	rows = append(rows, giu.TableRow(
-		giu.Label("快捷键"),
-		giu.Label("价格"),
-		giu.Label("成交额"),
+		giu.Label("HotKey"),
+		giu.Label("Price"),
+		giu.Label("TurnOver"),
 	).BgColor(global.PURPLE))
 
 	sortOrder(buyOrders)
@@ -75,9 +75,9 @@ func buildOpenSaleOrderTable() []*giu.TableRowWidget {
 	)
 
 	rows = append(rows, giu.TableRow(
-		giu.Label("快捷键"),
-		giu.Label("价格"),
-		giu.Label("成交额"),
+		giu.Label("HotKey"),
+		giu.Label("Price"),
+		giu.Label("TurnOver"),
 	).BgColor(global.PURPLE))
 
 	sortOrder(saleOrders)
