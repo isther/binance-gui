@@ -191,14 +191,14 @@ func mainWindow() {
 							giu.TabItem("交易对").Layout(
 								giu.Child().Layout(
 									giu.TabBar().TabItems(
+										giu.TabItem("BUSD").Layout(
+											giu.Table().Freeze(0, 1).FastMode(true).Rows(binance.GetTickerBUSDTable()...),
+										),
 										giu.TabItem("BTC").Layout(
 											giu.Table().Freeze(0, 1).FastMode(true).Rows(binance.GetTickerBTCTable()...),
 										),
 										giu.TabItem("USDT").Layout(
 											giu.Table().Freeze(0, 1).FastMode(true).Rows(binance.GetTickerUSDTTable()...),
-										),
-										giu.TabItem("BUSD").Layout(
-											giu.Table().Freeze(0, 1).FastMode(true).Rows(binance.GetTickerBUSDTable()...),
 										),
 									),
 								),
