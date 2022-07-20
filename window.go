@@ -188,7 +188,21 @@ func mainWindow() {
 						),
 						giu.TabBar().TabItems(
 							giu.TabItem("预警"),
-							giu.TabItem("交易对"),
+							giu.TabItem("交易对").Layout(
+								giu.Child().Layout(
+									giu.TabBar().TabItems(
+										giu.TabItem("BTC").Layout(
+											giu.Table().Freeze(0, 1).FastMode(true).Rows(binance.GetTickerBTCTable()...),
+										),
+										giu.TabItem("USDT").Layout(
+											giu.Table().Freeze(0, 1).FastMode(true).Rows(binance.GetTickerUSDTTable()...),
+										),
+										giu.TabItem("BUSD").Layout(
+											giu.Table().Freeze(0, 1).FastMode(true).Rows(binance.GetTickerBUSDTable()...),
+										),
+									),
+								),
+							),
 						),
 					),
 					giu.SplitLayout(giu.DirectionHorizontal, 300,
@@ -280,7 +294,11 @@ func mainWindow() {
 							giu.TabBar().TabItems(giu.TabItem("订单簿1").Layout(
 								giu.Column(
 									giu.Table().FastMode(true).Size(270, 420).Rows(binance.GetHttpDepthBuyTable()...),
-									giu.Label(fmt.Sprintf("持仓成本: %v", binance.CostInstance.UpdateAverageCode())),
+									giu.Style().
+										SetColor(giu.StyleColorText, binance.CostColor).
+										To(
+											giu.Label(fmt.Sprintf("持仓成本: %v", binance.CostInstance.UpdateAverageCode())),
+										),
 									giu.Table().FastMode(true).Size(270, 420).Rows(binance.GetHttpDepthSaleTable()...),
 									giu.Style().
 										SetColor(giu.StyleColorBorder, global.HotKeyColor).

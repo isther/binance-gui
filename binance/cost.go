@@ -1,8 +1,16 @@
 package binance
 
-import "sync"
+import (
+	"strconv"
+	"sync"
 
-var CostInstance *Cost
+	"github.com/isther/binanceGui/global"
+)
+
+var (
+	CostInstance *Cost
+	CostColor    = global.RED
+)
 
 type Cost struct {
 	Quantity   float64
@@ -52,8 +60,17 @@ func (c *Cost) UpdateAverageCode() string {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if c.Quantity == 0 {
+		CostColor = global.RED
 		return "0.0"
 	}
 
-	return correction(c.GlobalCost/c.Quantity, AccountInstance.PriceFilter.tickSize)
+	averageCostStr := correction(c.GlobalCost/c.Quantity, AccountInstance.PriceFilter.tickSize)
+	averageCost, _ := strconv.ParseFloat(averageCostStr, 64)
+	aggTradePrice, _ := strconv.ParseFloat(AggTradePrice, 64)
+	if averageCost > aggTradePrice {
+		CostColor = global.GREEN
+	} else {
+		CostColor = global.RED
+	}
+	return averageCostStr
 }

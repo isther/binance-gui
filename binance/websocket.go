@@ -1,6 +1,11 @@
 package binance
 
-import "github.com/isther/binanceGui/global"
+import (
+	"fmt"
+
+	"github.com/isther/binanceGui/console"
+	"github.com/isther/binanceGui/global"
+)
 
 func StartWebSocketStream() {
 	var (
@@ -36,10 +41,12 @@ func StartWebSocketStream() {
 	wsPartialDepthServerDoneC, wsPartialDepthServerStopC = runOneWsPartialDepth()
 	wsAggTradeServerDoneC, wsAggTradeServerStopC = runOneAggTradeDepth()
 	wsUpdateAccountDoneC, wsUpdateAccountStopC = AccountInstance.WsUpdateAccount()
+	StartUpdateWsTickerTable()
 	StartUpdateAccount()
 	for {
 		select {
 		case symbol := <-global.FreshC:
+			console.ConsoleInstance.Write(fmt.Sprintf("New Symbol: %v", symbol))
 			// Clear Order
 			AccountInstance.Symbol = symbol
 			go func() {
