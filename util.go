@@ -131,7 +131,7 @@ func ping() {
 		if err != nil {
 			global.Ping = "999ms"
 		}
-		global.Ping = fmt.Sprintf("%v", end.Sub(start))
+		global.Ping = fmt.Sprintf("%.2fms", float32(end.Sub(start).Microseconds())/1e3)
 		<-ticker.C
 	}
 }
