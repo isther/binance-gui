@@ -34,6 +34,8 @@ var (
 	buildTickerTableC = make(chan struct{})
 	updateTableC      = make(chan struct{})
 
+	openGlobalTickerC = false
+
 	mapBTC  = make(map[string]*myTicker)
 	mapUSDT = make(map[string]*myTicker)
 	mapBUSD = make(map[string]*myTicker)
@@ -124,7 +126,9 @@ func wsGetTicker() {
 	)
 
 	wsHandler := func(event libBinance.WsAllMiniMarketsStatEvent) {
-		globalTickerC <- event
+		if openGlobalTickerC {
+			globalTickerC <- event
+		}
 	}
 
 	errHandler := func(err error) {}
@@ -187,14 +191,17 @@ func buildTickerTable() ([]*giu.TableRowWidget, []*giu.TableRowWidget, []*giu.Ta
 		rowSelectable = giu.TableRow(
 			giu.Selectable("BaseAsset").Selected(false).OnDClick(func() {
 				sortTypeNow = sortByAssetDescend
+				openGlobalTickerC = true
 				updateTableC <- struct{}{}
 			}),
 			giu.Selectable("24hr TurnOver").Selected(false).OnDClick(func() {
 				sortTypeNow = sortByTurnOverDescend
+				openGlobalTickerC = true
 				updateTableC <- struct{}{}
 			}),
 			giu.Selectable("PriceChangePercent").Selected(false).OnDClick(func() {
 				sortTypeNow = sortByPercentageDescend
+				openGlobalTickerC = true
 				updateTableC <- struct{}{}
 			}),
 		).BgColor(global.PURPLE)
@@ -299,7 +306,7 @@ func buildTickerTable() ([]*giu.TableRowWidget, []*giu.TableRowWidget, []*giu.Ta
 				),
 		))
 	}
-
+	openGlobalTickerC = false
 	return rowsBTC, rowsUSDT, rowsBUSD
 }
 
