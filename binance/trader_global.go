@@ -144,6 +144,7 @@ func (g *GlobalTrader) createOrderOnFullWarehouse() {
 			console.ConsoleInstance.Write(fmt.Sprintf("已全仓卖出, 无需再次操作"))
 			return
 		}
+		ResetCostInstance()
 	}
 
 	g.createOrder(priceStr, quantityStr)
