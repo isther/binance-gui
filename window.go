@@ -38,6 +38,10 @@ func mainWindow() {
 						giu.Msgbox("快捷键说明", hotKeyTip).Buttons(giu.MsgboxButtonsOk)
 					}),
 				),
+				giu.Menu("快捷购买BNB").Layout(
+					giu.MenuItem("BUSD购买").OnClick(func() { go binance.NewTradeBNB("BUSD").Trade() }),
+					giu.MenuItem("USDT购买").OnClick(func() { go binance.NewTradeBNB("USDT").Trade() }),
+				),
 			),
 			giu.SplitLayout(giu.DirectionHorizontal, 700, // H
 				giu.SplitLayout(giu.DirectionVertical, 600,
