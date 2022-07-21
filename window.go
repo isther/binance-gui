@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
-	"time"
 
 	"github.com/AllenDang/giu"
 	"github.com/isther/binanceGui/binance"
@@ -18,12 +16,6 @@ var (
 	symbol  = binance.AccountInstance.Symbol
 	symbol1 = binance.AccountInstance.One.Asset
 	symbol2 = binance.AccountInstance.Two.Asset
-
-	timeDataMin  float64
-	timeDataMax  float64
-	timeDataX    []float64
-	timeDataY    []float64
-	timeScatterY []float64
 )
 
 func tipWindow() {
@@ -50,12 +42,7 @@ func mainWindow() {
 			giu.SplitLayout(giu.DirectionHorizontal, 700, // H
 				giu.SplitLayout(giu.DirectionVertical, 600,
 					giu.TabBar().TabItems(
-						giu.TabItem("K线").Layout(
-							giu.Plot("Plot Time Axe 时间线").Size(580, 540).AxisLimits(timeDataMin, timeDataMax, 0, 1, giu.ConditionOnce).XAxeFlags(giu.PlotAxisFlagsTime).Plots(
-								giu.PlotLineXY("Time Line 时间线", timeDataX, timeDataY),
-								giu.PlotScatterXY("Time Scatter 时间散点图", timeDataX, timeScatterY),
-							),
-						),
+						giu.TabItem("K线").Layout(),
 						giu.TabItem("终端").Layout(
 							giu.Label(console.ConsoleInstance.Read()),
 						),
@@ -285,7 +272,13 @@ func mainWindow() {
 											To(
 												giu.Column(
 													giu.Button("交易模式([]): "+global.GetTradeMode()),
-													giu.Button("服务器延迟: "+global.Ping),
+													giu.Row(
+														giu.Button("服务器延迟: "+global.Ping),
+														giu.Button("重连服务").OnClick(func() {
+															global.ReConnect <- struct{}{}
+															console.ConsoleInstance.Write("ReConnect...")
+														}),
+													),
 												),
 											),
 									),
@@ -316,15 +309,4 @@ func mainWindow() {
 				),
 			),
 		)
-}
-
-func plot() {
-	for i := 0; i < 100; i++ {
-		timeDataX = append(timeDataX, float64(time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC).Add(time.Hour*time.Duration(24*i)).Unix()))
-		timeDataY = append(timeDataY, rand.Float64())
-		timeScatterY = append(timeScatterY, rand.Float64())
-	}
-
-	timeDataMin = timeDataX[0]
-	timeDataMax = timeDataX[len(timeDataX)-1]
 }
