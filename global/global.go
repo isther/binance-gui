@@ -3,6 +3,8 @@ package global
 import "image/color"
 
 var (
+	ReConnect = make(chan struct{})
+
 	Ping  string
 	Debug = false
 

@@ -59,23 +59,11 @@ func GetTickerBUSDTable() []*giu.TableRowWidget {
 	return tickerBUSDTable
 }
 
-func StartUpdateWsTickerTable() {
-	go func() {
-		for {
-			tickerBTCTable, tickerUSDTTable, tickerBUSDTable = buildTickerTable()
-		}
-	}()
-
+func UpdateWsTickerTable() (chan struct{}, chan struct{}) {
 	httpGetTicker()
 	buildTickerTableC <- struct{}{}
 
-	go func() {
-		for {
-			updateMaps()
-		}
-	}()
-
-	go wsGetTicker()
+	return wsGetTicker()
 }
 
 func httpGetTicker() {
@@ -118,11 +106,11 @@ func httpGetTicker() {
 	}
 }
 
-func wsGetTicker() {
+func wsGetTicker() (chan struct{}, chan struct{}) {
 	var (
 		doneC chan struct{}
-		// stopC chan struct{}
-		err error
+		stopC chan struct{}
+		err   error
 	)
 
 	wsHandler := func(event libBinance.WsAllMiniMarketsStatEvent) {
@@ -131,14 +119,16 @@ func wsGetTicker() {
 		}
 	}
 
-	errHandler := func(err error) {}
-
-	doneC, _, err = libBinance.WsAllMiniMarketsStatServe(wsHandler, errHandler)
-	if err != nil {
-		fmt.Println(err)
+	errHandler := func(err error) {
+		console.ConsoleInstance.Write(fmt.Sprintf("%v", err))
 	}
 
-	<-doneC
+	doneC, stopC, err = libBinance.WsAllMiniMarketsStatServe(wsHandler, errHandler)
+	if err != nil {
+		console.ConsoleInstance.Write(fmt.Sprintf("%v", err))
+	}
+
+	return doneC, stopC
 }
 
 func updateMaps() {
