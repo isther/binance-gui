@@ -42,13 +42,13 @@ func runOneAggTradeDepth() (chan struct{}, chan struct{}) {
 	}
 
 	errHandler := func(err error) {
-		fmt.Println(err)
+		console.ConsoleInstance.Write(fmt.Sprintf("Error: %v", err))
 	}
 
 	doneC, stopC, err = libBinance.WsAggTradeServe(AccountInstance.Symbol, wsAggTradeHandler, errHandler)
 
 	if err != nil {
-		fmt.Println(err)
+		console.ConsoleInstance.Write(fmt.Sprintf("Error: %v", err))
 		return doneC, stopC
 	}
 	return doneC, stopC

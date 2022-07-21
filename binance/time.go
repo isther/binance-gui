@@ -2,6 +2,7 @@ package binance
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/isther/binanceGui/console"
@@ -35,7 +36,7 @@ func updateTime() {
 func getSystemTime() int64 {
 	timestamp, err := GetClient().NewServerTimeService().Do(context.Background())
 	if err != nil {
-		panic(err)
+		console.ConsoleInstance.Write(fmt.Sprintf("Error: %v", err))
 	}
 	return timestamp
 }

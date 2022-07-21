@@ -45,13 +45,13 @@ func runOneWsPartialDepth() (chan struct{}, chan struct{}) {
 	}
 
 	errHandler := func(err error) {
-		fmt.Println(err)
+		console.ConsoleInstance.Write(fmt.Sprintf("Error: %v", err))
 	}
 
 	doneC, stopC, err = libBinance.WsPartialDepthServe100Ms(AccountInstance.Symbol, fmt.Sprintf("%d", global.Levels), wsDepthHandler, errHandler)
 
 	if err != nil {
-		fmt.Println(err)
+		console.ConsoleInstance.Write(fmt.Sprintf("Error: %v", err))
 		return doneC, stopC
 	}
 	return doneC, stopC
