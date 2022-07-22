@@ -87,7 +87,7 @@ func buildHttpDepthBuyTable(res *libBinance.DepthResponse) []*giu.TableRowWidget
 			console.ConsoleInstance.Write(fmt.Sprintf("Error: %v", err))
 		}
 		priceStr := utils.Float64ToStringLen3(price)
-		countSet[priceStr] += price * quantity / 1000
+		countSet[priceStr] += price * quantity
 	}
 
 	for key := range countSet {
@@ -108,6 +108,10 @@ func buildHttpDepthBuyTable(res *libBinance.DepthResponse) []*giu.TableRowWidget
 			break
 		}
 		v := countSet[strSlice[i]]
+		turnOverStr := fmt.Sprintf("%.2fK", countSet[strSlice[i]]/1000)
+		if AccountInstance.Two.Asset == "BTC" {
+			turnOverStr = fmt.Sprintf("%.2f", countSet[strSlice[i]])
+		}
 		price, _ := strconv.ParseFloat(strSlice[i], 64)
 		aggTradePrice, _ := strconv.ParseFloat(AggTradePrice, 64)
 		rows[20-i] = giu.TableRow(
@@ -127,7 +131,7 @@ func buildHttpDepthBuyTable(res *libBinance.DepthResponse) []*giu.TableRowWidget
 				SetFontSize(global.Order2FontSize).
 				SetColor(giu.StyleColorText, global.RED).
 				To(
-					giu.Label(fmt.Sprintf("%.2fK", v)),
+					giu.Label(turnOverStr),
 				),
 		)
 	}
@@ -157,7 +161,7 @@ func buildHttpDepthSaleTable(res *libBinance.DepthResponse) []*giu.TableRowWidge
 			console.ConsoleInstance.Write(fmt.Sprintf("Error: %v", err))
 		}
 		priceStr := utils.Float64ToStringLen3(price)
-		countSet[priceStr] += price * quantity / 1000
+		countSet[priceStr] += price * quantity
 	}
 
 	for key := range countSet {
@@ -178,6 +182,10 @@ func buildHttpDepthSaleTable(res *libBinance.DepthResponse) []*giu.TableRowWidge
 			break
 		}
 		v := countSet[strSlice[i]]
+		turnOverStr := fmt.Sprintf("%.2fK", countSet[strSlice[i]]/1000)
+		if AccountInstance.Two.Asset == "BTC" {
+			turnOverStr = fmt.Sprintf("%.2f", countSet[strSlice[i]])
+		}
 		price, _ := strconv.ParseFloat(strSlice[i], 64)
 		aggTradePrice, _ := strconv.ParseFloat(AggTradePrice, 64)
 		rows = append(rows, giu.TableRow(
@@ -197,7 +205,7 @@ func buildHttpDepthSaleTable(res *libBinance.DepthResponse) []*giu.TableRowWidge
 				SetFontSize(global.Order2FontSize).
 				SetColor(giu.StyleColorText, global.GREEN).
 				To(
-					giu.Label(fmt.Sprintf("%.2fK", v)),
+					giu.Label(turnOverStr),
 				),
 		))
 	}

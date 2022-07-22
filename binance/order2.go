@@ -91,6 +91,12 @@ func buildWsPartialDepthTable() []*giu.TableRowWidget {
 		if err != nil {
 			console.ConsoleInstance.Write(fmt.Sprintf("Error: %v", err))
 		}
+
+		turnOverStr := fmt.Sprintf("%.2fK", price*quantity/1000)
+		if AccountInstance.Two.Asset == "BTC" {
+			turnOverStr = fmt.Sprintf("%.2f", price*quantity)
+		}
+
 		rows[length-i-1] = giu.TableRow(
 			giu.Style().
 				SetFontSize(global.Order2FontSize).
@@ -108,13 +114,17 @@ func buildWsPartialDepthTable() []*giu.TableRowWidget {
 				SetFontSize(global.Order2FontSize).
 				SetColor(giu.StyleColorText, global.RED).
 				To(
-					giu.Label(fmt.Sprintf("%.2fK", price*quantity/1000)),
+					giu.Label(turnOverStr),
 				),
 		)
 
 		price, quantity, err = eventNew.Bids[i].Parse()
 		if err != nil {
 			console.ConsoleInstance.Write(fmt.Sprintf("Error: %v", err))
+		}
+		turnOverStr = fmt.Sprintf("%.2fK", price*quantity/1000)
+		if AccountInstance.Two.Asset == "BTC" {
+			turnOverStr = fmt.Sprintf("%.2f", price*quantity)
 		}
 
 		rows[length+i+1] = giu.TableRow(
@@ -134,7 +144,7 @@ func buildWsPartialDepthTable() []*giu.TableRowWidget {
 				SetFontSize(global.Order2FontSize).
 				SetColor(giu.StyleColorText, global.GREEN).
 				To(
-					giu.Label(fmt.Sprintf("%.2fK", price*quantity/1000)),
+					giu.Label(turnOverStr),
 				),
 		)
 	}

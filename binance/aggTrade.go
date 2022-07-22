@@ -85,6 +85,10 @@ func buildAggTradeTable() []*giu.TableRowWidget {
 	}
 
 	timeStr := time.Unix(aggTradeNew.Time/1e3, 0)
+	turnOverStr := fmt.Sprintf("%.2fK", price*quantity/1000)
+	if AccountInstance.Two.Asset == "BTC" {
+		turnOverStr = fmt.Sprintf("%.2f", price*quantity)
+	}
 	rows = append(rows, giu.TableRow(
 		giu.Label(fmt.Sprintf("%v:%v", timeStr.Minute(), timeStr.Second())),
 		giu.Style().SetColor(giu.StyleColorText, aggTradeColorSet(price, quantity)).
@@ -94,7 +98,7 @@ func buildAggTradeTable() []*giu.TableRowWidget {
 		giu.Style().
 			SetColor(giu.StyleColorText, eColor).
 			To(
-				giu.Label(fmt.Sprintf("%.2fK", price*quantity/1000)),
+				giu.Label(turnOverStr),
 			),
 	))
 	if len(wsAggTradeTable) > 1 {
