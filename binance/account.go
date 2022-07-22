@@ -7,6 +7,7 @@ import (
 
 	"github.com/isther/binanceGui/console"
 	"github.com/isther/binanceGui/orderlist"
+	"github.com/isther/binanceGui/utils"
 
 	libBinance "github.com/adshao/go-binance/v2"
 )
@@ -226,6 +227,7 @@ func (account *Account) parseOrderUpdate(orderUpdate libBinance.WsOrderUpdate) {
 		console.ConsoleInstance.Write(fmt.Sprintf("[CANCELED] OK, ID: %v", orderUpdate.OrigCustomOrderId))
 		orderlist.OrderListInstance.CancelOrdersByID(orderUpdate.OrigCustomOrderId)
 	} else if orderUpdate.Status == "FILLED" {
+		utils.WinSound()
 		console.ConsoleInstance.Write(fmt.Sprintf("[FILLED] OK, ID: %v", orderUpdate.ClientOrderId))
 		orderlist.OrderListInstance.CancelOrdersByID(orderUpdate.ClientOrderId)
 
@@ -257,6 +259,7 @@ func (account *Account) parseOrderUpdate(orderUpdate libBinance.WsOrderUpdate) {
 			}
 		}
 	} else if orderUpdate.Status == "PARTIALLY_FILLED" {
+		utils.WinSound()
 		console.ConsoleInstance.Write(fmt.Sprintf("[PARTIALLY_TRADE] OK, ID: %v", orderUpdate.ClientOrderId))
 		{ // average cost
 			quantity, _ := strconv.ParseFloat(orderUpdate.LatestVolume, 64)
