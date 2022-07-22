@@ -39,11 +39,152 @@ func mainWindow() {
 					}),
 				),
 				giu.Menu("快捷购买BNB").Layout(
-					giu.MenuItem("BUSD购买").OnClick(func() { go binance.NewTradeBNB("BUSD").Trade() }),
-					giu.MenuItem("USDT购买").OnClick(func() { go binance.NewTradeBNB("USDT").Trade() }),
+					giu.Button("BUSD购买").OnClick(func() { go binance.NewTradeBNB("BUSD").Trade() }),
+					giu.Button("USDT购买").OnClick(func() { go binance.NewTradeBNB("USDT").Trade() }),
+				),
+				giu.Button("币安系统时间: "+binance.TimeString),
+				giu.Button("服务器延迟: "+global.Ping),
+				giu.Button("交易模式([]): "+global.GetTradeMode()),
+				giu.Style().
+					SetColor(giu.StyleColorBorder, global.HotKeyColor).
+					To(
+						giu.Column(
+							giu.Button("交易热键状态(空格): "+global.GetHotKeyStatus()).OnClick(func() { global.ReverseHotKeyStatus() }),
+						),
+					),
+				giu.Menu("WebSocket重连").Layout(
+					giu.Button("账户信息推送").OnClick(func() { global.ReConnectWsUpdateAccount <- struct{}{} }),
+					giu.Button("成交明细").OnClick(func() { global.ReConnectWsAggTrade <- struct{}{} }),
+					giu.Button("订单簿2").OnClick(func() { global.ReConnectWsPartialDepth <- struct{}{} }),
+					giu.Button("交易对更新").OnClick(func() { global.ReConnectWsTickerTable <- struct{}{} }),
 				),
 			),
-			giu.SplitLayout(giu.DirectionHorizontal, 700, // H
+			giu.SplitLayout(giu.DirectionHorizontal, 1200, // H
+				giu.SplitLayout(giu.DirectionHorizontal, 300,
+					giu.SplitLayout(giu.DirectionVertical, 600,
+						giu.TabBar().TabItems(
+							giu.TabItem("当前挂单").Layout(
+								giu.SplitLayout(giu.DirectionVertical, 280, //V
+									giu.Table().Freeze(0, 1).FastMode(true).Size(270, 300).Rows(orderlist.GetOpenSaleOrdersTable()...),
+									giu.Table().Freeze(0, 1).FastMode(true).Size(270, 300).Rows(orderlist.GetOpenBuyOrdersTable()...),
+								),
+							),
+						),
+						giu.TabBar().TabItems(
+							giu.TabItem("预警").Layout(
+								giu.SplitLayout(giu.DirectionVertical, 125,
+									giu.Table().Freeze(0, 1).FastMode(true).Rows(binance.GetEarlyWaringTable1m()...),
+									giu.Table().Freeze(0, 1).FastMode(true).Rows(binance.GetEarlyWaringTable3m()...),
+								),
+							),
+							giu.TabItem("交易对").Layout(
+								giu.Child().Layout(
+									giu.TabBar().TabItems(
+										giu.TabItem("BUSD").Layout(
+											giu.Table().Freeze(0, 1).FastMode(true).Rows(binance.GetTickerBUSDTable()...),
+										),
+										giu.TabItem("BTC").Layout(
+											giu.Table().Freeze(0, 1).FastMode(true).Rows(binance.GetTickerBTCTable()...),
+										),
+										giu.TabItem("USDT").Layout(
+											giu.Table().Freeze(0, 1).FastMode(true).Rows(binance.GetTickerUSDTTable()...),
+										),
+									),
+								),
+							),
+						),
+					),
+					giu.SplitLayout(giu.DirectionHorizontal, 300,
+						giu.SplitLayout(giu.DirectionVertical, 600,
+							giu.TabBar().TabItems(
+								giu.TabItem("成交明细").Layout(
+									giu.Table().Freeze(0, 1).FastMode(true).Rows(binance.GetWsAggTradeTable()...),
+								),
+							),
+							giu.SplitLayout(giu.DirectionVertical, 125, //V
+								giu.TabBar().TabItems(
+									giu.TabItem("交易账户余额").Layout(
+										giu.Table().Columns(
+											giu.TableColumn("Symbol"),
+											giu.TableColumn("Free"),
+											giu.TableColumn("Locked"),
+										).Rows(
+											giu.TableRow(
+												giu.Label(fmt.Sprintf("%s", binance.AccountInstance.One.Asset)),
+												giu.Label(fmt.Sprintf("%s", binance.AccountInstance.One.Free)),
+												giu.Label(fmt.Sprintf("%s", binance.AccountInstance.One.Locked)),
+											),
+											giu.TableRow(
+												giu.Label(fmt.Sprintf("%s", binance.AccountInstance.Two.Asset)),
+												giu.Label(fmt.Sprintf("%s", binance.AccountInstance.Two.Free)),
+												giu.Label(fmt.Sprintf("%s", binance.AccountInstance.Two.Locked)),
+											),
+											giu.TableRow(
+												giu.Label(fmt.Sprintf("%s", binance.AccountInstance.BNB.Asset)),
+												giu.Label(fmt.Sprintf("%s", binance.AccountInstance.BNB.Free)),
+												giu.Label(fmt.Sprintf("%s", binance.AccountInstance.BNB.Locked)),
+											),
+										),
+									),
+								),
+								giu.TabBar().TabItems(giu.TabItem("下单配置").Layout(
+									giu.Column(
+										giu.Row(
+											giu.Label("交易对: "),
+											giu.InputText(&symbol1).Size(72.5),
+											giu.Label("/"),
+											giu.InputText(&symbol2).Size(72.5),
+											giu.Button("确定").OnClick(freshSymbol),
+										),
+										giu.Row(
+											giu.Label("分仓数: "),
+											giu.InputInt(&global.Average).Size(120),
+											giu.Button("确定(Enter)").OnClick(binance.UpdateAverageAmount),
+										),
+										giu.Style().
+											SetColor(giu.StyleColorBorder, global.BLUE).
+											SetStyle(giu.StyleVarFramePadding, 10, 10).
+											To(
+												giu.Column(
+													giu.Button(fmt.Sprintf("单仓数量:")),
+													giu.Button(fmt.Sprintf("%s: %.8f",
+														binance.AccountInstance.One.Asset, global.AverageSymbol1Amount)),
+													giu.Button(fmt.Sprintf("%s : %.8f",
+														binance.AccountInstance.Two.Asset, global.AverageSymbol2Amount)),
+												),
+											),
+									),
+								)),
+							),
+						),
+						giu.SplitLayout(giu.DirectionHorizontal, 300,
+							giu.TabBar().TabItems(
+								giu.TabItem("订单簿2").Layout(
+									giu.Column(
+										giu.Table().FastMode(true).Size(270, 420).Rows(binance.GetWsPartialDepthBuyTable()...),
+										giu.Style().
+											SetColor(giu.StyleColorText, binance.AggTradePriceColor).
+											To(
+												giu.Label(fmt.Sprintf("实时价格: %s", binance.AggTradePrice)),
+											),
+										giu.Table().FastMode(true).Size(270, 420).Rows(binance.GetWsPartialDepthSaleTable()...),
+									),
+								),
+							),
+							giu.TabBar().TabItems(giu.TabItem("订单簿1").Layout(
+								giu.Column(
+									giu.Table().FastMode(true).Size(270, 420).Rows(binance.GetHttpDepthBuyTable()...),
+									giu.Style().
+										SetColor(giu.StyleColorText, binance.CostColor).
+										To(
+											giu.Label(fmt.Sprintf("持仓成本: %v", binance.CostInstance.UpdateAverageCode())),
+										),
+									giu.Table().FastMode(true).Size(270, 420).Rows(binance.GetHttpDepthSaleTable()...),
+								),
+							)),
+						),
+					),
+				),
 				giu.SplitLayout(giu.DirectionVertical, 600,
 					giu.TabBar().TabItems(
 						// giu.TabItem("K线").Layout(),
@@ -183,161 +324,6 @@ func mainWindow() {
 					giu.TabBar().TabItems(
 						giu.TabItem("历史订单").Layout(
 							giu.Table().Freeze(0, 1).FastMode(true).Rows(binance.GetHistoryTable()...),
-						),
-					),
-				),
-				giu.SplitLayout(giu.DirectionHorizontal, 300,
-					giu.SplitLayout(giu.DirectionVertical, 600,
-						giu.TabBar().TabItems(
-							giu.TabItem("当前挂单").Layout(
-								giu.SplitLayout(giu.DirectionVertical, 280, //V
-									giu.Table().Freeze(0, 1).FastMode(true).Size(270, 300).Rows(orderlist.GetOpenSaleOrdersTable()...),
-									giu.Table().Freeze(0, 1).FastMode(true).Size(270, 300).Rows(orderlist.GetOpenBuyOrdersTable()...),
-								),
-							),
-						),
-						giu.TabBar().TabItems(
-							giu.TabItem("预警").Layout(
-								giu.Child().Layout(
-									giu.TabBar().TabItems(
-										giu.TabItem("1m").Layout(
-											giu.Table().Freeze(0, 1).FastMode(true).Rows(binance.GetEarlyWaringTable1m()...),
-										),
-										giu.TabItem("3m").Layout(
-											giu.Table().Freeze(0, 1).FastMode(true).Rows(binance.GetEarlyWaringTable3m()...),
-										),
-									),
-								),
-							),
-							giu.TabItem("交易对").Layout(
-								giu.Child().Layout(
-									giu.TabBar().TabItems(
-										giu.TabItem("BUSD").Layout(
-											giu.Table().Freeze(0, 1).FastMode(true).Rows(binance.GetTickerBUSDTable()...),
-										),
-										giu.TabItem("BTC").Layout(
-											giu.Table().Freeze(0, 1).FastMode(true).Rows(binance.GetTickerBTCTable()...),
-										),
-										giu.TabItem("USDT").Layout(
-											giu.Table().Freeze(0, 1).FastMode(true).Rows(binance.GetTickerUSDTTable()...),
-										),
-									),
-								),
-							),
-						),
-					),
-					giu.SplitLayout(giu.DirectionHorizontal, 300,
-						giu.SplitLayout(giu.DirectionVertical, 600,
-							giu.TabBar().TabItems(
-								giu.TabItem("成交明细").Layout(
-									giu.Table().Freeze(0, 1).FastMode(true).Rows(binance.GetWsAggTradeTable()...),
-								),
-							),
-							giu.SplitLayout(giu.DirectionVertical, 125, //V
-								giu.TabBar().TabItems(
-									giu.TabItem("交易账户余额").Layout(
-										giu.Table().Columns(
-											giu.TableColumn("Symbol"),
-											giu.TableColumn("Free"),
-											giu.TableColumn("Locked"),
-										).Rows(
-											giu.TableRow(
-												giu.Label(fmt.Sprintf("%s", binance.AccountInstance.One.Asset)),
-												giu.Label(fmt.Sprintf("%s", binance.AccountInstance.One.Free)),
-												giu.Label(fmt.Sprintf("%s", binance.AccountInstance.One.Locked)),
-											),
-											giu.TableRow(
-												giu.Label(fmt.Sprintf("%s", binance.AccountInstance.Two.Asset)),
-												giu.Label(fmt.Sprintf("%s", binance.AccountInstance.Two.Free)),
-												giu.Label(fmt.Sprintf("%s", binance.AccountInstance.Two.Locked)),
-											),
-											giu.TableRow(
-												giu.Label(fmt.Sprintf("%s", binance.AccountInstance.BNB.Asset)),
-												giu.Label(fmt.Sprintf("%s", binance.AccountInstance.BNB.Free)),
-												giu.Label(fmt.Sprintf("%s", binance.AccountInstance.BNB.Locked)),
-											),
-										),
-									),
-								),
-								giu.TabBar().TabItems(giu.TabItem("下单配置").Layout(
-									giu.Column(
-										giu.Row(
-											giu.Label("交易对: "),
-											giu.InputText(&symbol1).Size(72.5),
-											giu.Label("/"),
-											giu.InputText(&symbol2).Size(72.5),
-											giu.Button("确定").OnClick(freshSymbol),
-										),
-										giu.Row(
-											giu.Label("分仓数: "),
-											giu.InputInt(&global.Average).Size(120),
-											giu.Button("确定(Enter)").OnClick(binance.UpdateAverageAmount),
-										),
-										giu.Style().
-											SetColor(giu.StyleColorBorder, global.BLUE).
-											SetStyle(giu.StyleVarFramePadding, 10, 10).
-											To(
-												giu.Column(
-													giu.Button(fmt.Sprintf("单仓数量:")),
-													giu.Button(fmt.Sprintf("%s: %.8f",
-														binance.AccountInstance.One.Asset, global.AverageSymbol1Amount)),
-													giu.Button(fmt.Sprintf("%s : %.8f",
-														binance.AccountInstance.Two.Asset, global.AverageSymbol2Amount)),
-												),
-											),
-									),
-								)),
-							),
-						),
-						giu.SplitLayout(giu.DirectionHorizontal, 300,
-							giu.TabBar().TabItems(
-								giu.TabItem("订单簿2").Layout(
-									giu.Column(
-										giu.Table().FastMode(true).Size(270, 420).Rows(binance.GetWsPartialDepthBuyTable()...),
-										giu.Style().
-											SetColor(giu.StyleColorText, binance.AggTradePriceColor).
-											To(
-												giu.Label(fmt.Sprintf("实时价格: %s", binance.AggTradePrice)),
-											),
-										giu.Table().FastMode(true).Size(270, 420).Rows(binance.GetWsPartialDepthSaleTable()...),
-										giu.Style().
-											SetColor(giu.StyleColorBorder, global.BLUE).
-											SetStyle(giu.StyleVarFramePadding, 10, 10).
-											To(
-												giu.Column(
-													giu.Button("交易模式([]): "+global.GetTradeMode()),
-													giu.Row(
-														giu.Button("服务器延迟: "+global.Ping),
-														giu.Button("重连服务").OnClick(func() {
-															global.ReConnect <- struct{}{}
-															console.ConsoleInstance.Write("ReConnect...")
-														}),
-													),
-												),
-											),
-									),
-								),
-							),
-							giu.TabBar().TabItems(giu.TabItem("订单簿1").Layout(
-								giu.Column(
-									giu.Table().FastMode(true).Size(270, 420).Rows(binance.GetHttpDepthBuyTable()...),
-									giu.Style().
-										SetColor(giu.StyleColorText, binance.CostColor).
-										To(
-											giu.Label(fmt.Sprintf("持仓成本: %v", binance.CostInstance.UpdateAverageCode())),
-										),
-									giu.Table().FastMode(true).Size(270, 420).Rows(binance.GetHttpDepthSaleTable()...),
-									giu.Style().
-										SetColor(giu.StyleColorBorder, global.HotKeyColor).
-										SetStyle(giu.StyleVarFramePadding, 10, 10).
-										To(
-											giu.Column(
-												giu.Button("交易热键状态(空格): "+global.GetHotKeyStatus()).OnClick(func() { global.ReverseHotKeyStatus() }),
-												giu.Button("币安系统时间: "+binance.TimeString),
-											),
-										),
-								),
-							)),
 						),
 					),
 				),

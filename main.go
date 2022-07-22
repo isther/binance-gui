@@ -14,10 +14,10 @@ import (
 )
 
 var (
-	windowX int = 1080
-	windowY int = 1920
+	windowX int = 960
+	windowY int = 1200
 
-	endTimeStr = "2022-07-24 12:00:00"
+	endTimeStr = "2023-07-22 00:00:00"
 )
 
 func init() {
@@ -60,7 +60,8 @@ func runGUI() {
 		pprof()
 	}
 
-	app := giu.NewMasterWindow("Binance-GUI", windowX, windowX, giu.MasterWindowFlagsMaximized).
+	// app := giu.NewMasterWindow("Binance-GUI", windowX, windowX, giu.MasterWindowFlagsMaximized).
+	app := giu.NewMasterWindow("Binance-GUI", windowY, windowX, 0).
 		RegisterKeyboardShortcuts( // 分仓下单
 			regAllUsedKey(giu.ModNone)...,
 		).RegisterKeyboardShortcuts( // 分仓数设置快捷键

@@ -107,7 +107,7 @@ func buildHttpDepthBuyTable(res *libBinance.DepthResponse) []*giu.TableRowWidget
 		if i >= 20 {
 			break
 		}
-		v := countSet[strSlice[i]]
+		v := countSet[strSlice[i]] / 1000
 		turnOverStr := fmt.Sprintf("%.2fK", countSet[strSlice[i]]/1000)
 		if AccountInstance.Two.Asset == "BTC" {
 			turnOverStr = fmt.Sprintf("%.2f", countSet[strSlice[i]])
@@ -181,7 +181,7 @@ func buildHttpDepthSaleTable(res *libBinance.DepthResponse) []*giu.TableRowWidge
 		if i > 20 {
 			break
 		}
-		v := countSet[strSlice[i]]
+		v := countSet[strSlice[i]] / 1000
 		turnOverStr := fmt.Sprintf("%.2fK", countSet[strSlice[i]]/1000)
 		if AccountInstance.Two.Asset == "BTC" {
 			turnOverStr = fmt.Sprintf("%.2f", countSet[strSlice[i]])

@@ -36,20 +36,4 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-}
-
-func WriteYAML(conf Config) {
-	var (
-		err error
-	)
-
-	out, err := yaml.Marshal(&conf)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	err = ioutil.WriteFile(configFilePath, out, 0777)
-	if err != nil {
-		log.Fatalln(err)
-	}
 }
