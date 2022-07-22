@@ -17,7 +17,7 @@ var (
 	windowX int = 1080
 	windowY int = 1920
 
-	endTimeStr = "2022-07-23 12:00:00"
+	endTimeStr = "2022-07-24 12:00:00"
 )
 
 func init() {
@@ -48,6 +48,7 @@ func init() {
 	go ping()
 	go binance.StartWebSocketStream()
 	binance.StartHttpDepthTable()
+	binance.ListenEarlyWarning()
 }
 
 func main() {

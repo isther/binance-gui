@@ -3,6 +3,15 @@ package global
 import "image/color"
 
 var (
+	// 筛选与预警
+	EarlyWarning = false
+
+	EarlyWarning1mAmplitude float32 = 2
+	EarlyWarning1mTurnOver  float32 = 20000
+
+	EarlyWarning3mAmplitude float32 = 3
+	EarlyWarning3mTurnOver  float32 = 40000
+
 	ReConnect = make(chan struct{})
 
 	Ping  string

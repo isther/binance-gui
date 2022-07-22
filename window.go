@@ -46,11 +46,11 @@ func mainWindow() {
 			giu.SplitLayout(giu.DirectionHorizontal, 700, // H
 				giu.SplitLayout(giu.DirectionVertical, 600,
 					giu.TabBar().TabItems(
-						giu.TabItem("K线").Layout(),
+						// giu.TabItem("K线").Layout(),
 						giu.TabItem("终端").Layout(
 							giu.Label(console.ConsoleInstance.Read()),
 						),
-						giu.TabItem("波动比设置").Layout(giu.Style().
+						giu.TabItem("参数设置").Layout(giu.Style().
 							SetColor(giu.StyleColorBorder, global.BLUE).
 							SetStyle(giu.StyleVarFramePadding, 10, 10).
 							To(
@@ -158,6 +158,25 @@ func mainWindow() {
 										giu.Label("四档"),
 										giu.InputInt(&global.Order1BigOrderReminder[4]).Size(volatilityRatiosInputSize),
 									),
+									giu.Row(
+										giu.Label("筛选与预警   "),
+										giu.Label("开启预警:"),
+										giu.Checkbox("", &global.EarlyWarning),
+									),
+									giu.Row(
+										giu.Label("1m: "),
+										giu.Label("涨幅"),
+										giu.InputFloat(&global.EarlyWarning1mAmplitude).Size(volatilityRatiosInputSize),
+										giu.Label("成交额"),
+										giu.InputFloat(&global.EarlyWarning1mTurnOver).Size(volatilityRatiosInputSize),
+									),
+									giu.Row(
+										giu.Label("3m: "),
+										giu.Label("涨幅"),
+										giu.InputFloat(&global.EarlyWarning3mAmplitude).Size(volatilityRatiosInputSize),
+										giu.Label("成交额"),
+										giu.InputFloat(&global.EarlyWarning3mTurnOver).Size(volatilityRatiosInputSize),
+									),
 								),
 							)),
 					),
@@ -178,7 +197,18 @@ func mainWindow() {
 							),
 						),
 						giu.TabBar().TabItems(
-							giu.TabItem("预警"),
+							giu.TabItem("预警").Layout(
+								giu.Child().Layout(
+									giu.TabBar().TabItems(
+										giu.TabItem("1m").Layout(
+											giu.Table().Freeze(0, 1).FastMode(true).Rows(binance.GetEarlyWaringTable1m()...),
+										),
+										giu.TabItem("3m").Layout(
+											giu.Table().Freeze(0, 1).FastMode(true).Rows(binance.GetEarlyWaringTable3m()...),
+										),
+									),
+								),
+							),
 							giu.TabItem("交易对").Layout(
 								giu.Child().Layout(
 									giu.TabBar().TabItems(
