@@ -4,7 +4,21 @@ import (
 	"fmt"
 	"math"
 	"strings"
+	"syscall"
+	"unsafe"
 )
+
+func WinSound() {
+	funInDllFile, err := syscall.LoadLibrary("Winmm.dll") // 调用的dll文件
+	if err != nil {
+		print("cant not call : syscall.LoadLibrary , errorInfo :" + err.Error())
+	}
+	defer syscall.FreeLibrary(funInDllFile)
+
+	funName := "PlaySound"
+	win32Fun, err := syscall.GetProcAddress(syscall.Handle(funInDllFile), funName)
+	_, _, err = syscall.Syscall6(uintptr(win32Fun), 3, uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr("alert"))), uintptr(0), uintptr(0), 0, 0, 0)
+}
 
 func Float64ToStringLen3(f float64) string {
 	var s = fmt.Sprintf("%.8f", f)
