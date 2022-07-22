@@ -116,7 +116,7 @@ func (t *Trader) createOrderOnFullWarehouse() {
 
 		//{{{ Prepare quantity: 当前余额/按键价格=数量
 		free, _ := strconv.ParseFloat(AccountInstance.Two.Free, 64)
-		quantityStr = t.quantityCorrection(float64(free / price))
+		quantityStr = t.quantityCorrection(float64(free / price * 0.99))
 		//}}}
 		console.ConsoleInstance.Write(fmt.Sprintf("全仓买入"))
 	} else {

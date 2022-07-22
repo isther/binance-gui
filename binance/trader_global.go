@@ -123,7 +123,7 @@ func (g *GlobalTrader) createOrderOnFullWarehouse() {
 		priceStr = g.priceCorrection(price)
 
 		free, _ := strconv.ParseFloat(AccountInstance.Two.Free, 64)
-		quantityStr = g.quantityCorrection(float64(free / price))
+		quantityStr = g.quantityCorrection(float64(free/price) * 0.99)
 		console.ConsoleInstance.Write(fmt.Sprintf("全局全仓买入"))
 	} else {
 		if g.key == "F12" {
@@ -144,7 +144,6 @@ func (g *GlobalTrader) createOrderOnFullWarehouse() {
 			console.ConsoleInstance.Write(fmt.Sprintf("已全仓卖出, 无需再次操作"))
 			return
 		}
-		ResetCostInstance()
 	}
 
 	g.createOrder(priceStr, quantityStr)
@@ -205,6 +204,7 @@ func (g *GlobalTrader) cancelAllOrderAndSellAllPositions() {
 		g.createOrderOnFullWarehouse()
 		time.Sleep(200 * time.Millisecond)
 	}
+	ResetCostInstance()
 }
 
 func (g *GlobalTrader) createOrder(price, quantity string) {
