@@ -108,7 +108,7 @@ func (this *EarlyWarner) buildTable() []*giu.TableRowWidget {
 		))
 	}
 	if len(rows) > 1 {
-		utils.WinSound()
+		utils.PlayAMusic("music/warning.mp3")
 	}
 	return rows
 }

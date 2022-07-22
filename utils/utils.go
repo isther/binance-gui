@@ -2,22 +2,78 @@ package utils
 
 import (
 	"fmt"
+	"io"
 	"math"
+	"os"
 	"strings"
-	"syscall"
-	"unsafe"
+	"time"
+
+	"github.com/gen2brain/malgo"
+	"github.com/hajimehoshi/go-mp3"
+	"github.com/isther/binanceGui/console"
 )
 
-func WinSound() {
-	funInDllFile, err := syscall.LoadLibrary("Winmm.dll") // 调用的dll文件
+func PlayAMusic(music string) {
+	file, err := os.Open(music)
 	if err != nil {
-		print("cant not call : syscall.LoadLibrary , errorInfo :" + err.Error())
+		console.ConsoleInstance.Write(fmt.Sprintf("Error: %v", err))
+		return
 	}
-	defer syscall.FreeLibrary(funInDllFile)
+	defer file.Close()
 
-	funName := "PlaySound"
-	win32Fun, err := syscall.GetProcAddress(syscall.Handle(funInDllFile), funName)
-	_, _, err = syscall.Syscall6(uintptr(win32Fun), 3, uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr("alert"))), uintptr(0), uintptr(0), 0, 0, 0)
+	var reader io.Reader
+	var channels, sampleRate uint32
+
+	m, err := mp3.NewDecoder(file)
+	if err != nil {
+		console.ConsoleInstance.Write(fmt.Sprintf("Error: %v", err))
+		return
+	}
+
+	reader = m
+	channels = 2
+	sampleRate = uint32(m.SampleRate())
+
+	ctx, err := malgo.InitContext(nil, malgo.ContextConfig{}, func(message string) {
+		fmt.Printf("LOG <%v>\n", message)
+	})
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	defer func() {
+		_ = ctx.Uninit()
+		ctx.Free()
+	}()
+
+	deviceConfig := malgo.DefaultDeviceConfig(malgo.Playback)
+	deviceConfig.Playback.Format = malgo.FormatS16
+	deviceConfig.Playback.Channels = channels
+	deviceConfig.SampleRate = sampleRate
+	deviceConfig.Alsa.NoMMap = 1
+
+	// This is the function that's used for sending more data to the device for playback.
+	onSamples := func(pOutputSample, pInputSamples []byte, framecount uint32) {
+		io.ReadFull(reader, pOutputSample)
+	}
+
+	deviceCallbacks := malgo.DeviceCallbacks{
+		Data: onSamples,
+	}
+	device, err := malgo.InitDevice(ctx.Context, deviceConfig, deviceCallbacks)
+	if err != nil {
+		console.ConsoleInstance.Write(fmt.Sprintf("Error: %v", err))
+		return
+	}
+	defer device.Uninit()
+
+	err = device.Start()
+	if err != nil {
+		console.ConsoleInstance.Write(fmt.Sprintf("Error: %v", err))
+		return
+	}
+
+	time.Sleep(3 * time.Second)
 }
 
 func Float64ToStringLen3(f float64) string {

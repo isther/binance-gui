@@ -227,7 +227,6 @@ func (account *Account) parseOrderUpdate(orderUpdate libBinance.WsOrderUpdate) {
 		console.ConsoleInstance.Write(fmt.Sprintf("[CANCELED] OK, ID: %v", orderUpdate.OrigCustomOrderId))
 		orderlist.OrderListInstance.CancelOrdersByID(orderUpdate.OrigCustomOrderId)
 	} else if orderUpdate.Status == "FILLED" {
-		utils.WinSound()
 		console.ConsoleInstance.Write(fmt.Sprintf("[FILLED] OK, ID: %v", orderUpdate.ClientOrderId))
 		orderlist.OrderListInstance.CancelOrdersByID(orderUpdate.ClientOrderId)
 
@@ -235,8 +234,10 @@ func (account *Account) parseOrderUpdate(orderUpdate libBinance.WsOrderUpdate) {
 			var isBuyer bool
 			if libBinance.SideType(orderUpdate.Side) == libBinance.SideTypeBuy {
 				isBuyer = true
+				utils.PlayAMusic("music/buy.mp3")
 			} else {
 				isBuyer = false
+				utils.PlayAMusic("music/sell.mp3")
 			}
 			globalHistoryC <- &libBinance.TradeV3{
 				IsBuyer:         isBuyer,
@@ -259,15 +260,16 @@ func (account *Account) parseOrderUpdate(orderUpdate libBinance.WsOrderUpdate) {
 			}
 		}
 	} else if orderUpdate.Status == "PARTIALLY_FILLED" {
-		utils.WinSound()
 		console.ConsoleInstance.Write(fmt.Sprintf("[PARTIALLY_TRADE] OK, ID: %v", orderUpdate.ClientOrderId))
 		{ // average cost
 			quantity, _ := strconv.ParseFloat(orderUpdate.LatestVolume, 64)
 			price, _ := strconv.ParseFloat(orderUpdate.LatestPrice, 64)
 			if libBinance.SideType(orderUpdate.Side) == libBinance.SideTypeBuy {
 				CostInstance.Buy(quantity, price)
+				utils.PlayAMusic("music/buy.mp3")
 			} else {
 				CostInstance.Sale(quantity, price)
+				utils.PlayAMusic("music/sell.mp3")
 			}
 		}
 	} else {

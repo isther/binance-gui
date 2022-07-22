@@ -5,6 +5,8 @@ go 1.18
 require (
 	github.com/AllenDang/giu v0.6.2
 	github.com/adshao/go-binance/v2 v2.3.6
+	github.com/gen2brain/malgo v0.10.35
+	github.com/hajimehoshi/go-mp3 v0.3.3
 	gopkg.in/yaml.v2 v2.4.0
 )
 
