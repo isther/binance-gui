@@ -14,10 +14,11 @@ var (
 )
 
 type Config struct {
-	Pprof     bool   `yaml:"pprof"`
-	Proxy     string `yaml:"proxy"`
-	ApiKey    string `yaml:"apiKey"`
-	SecretKey string `yaml:"secretKey"`
+	Pprof     bool     `yaml:"pprof"`
+	Proxy     string   `yaml:"proxy"`
+	ApiKey    string   `yaml:"apiKey"`
+	SecretKey string   `yaml:"secretKey"`
+	Symbols   []string `yaml:"symbols"`
 }
 
 func init() {
