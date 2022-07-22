@@ -108,26 +108,15 @@ func StartWebSocketStream() {
 	go func() {
 		for {
 			select {
-			case symbol := <-global.ReConnect:
-				console.ConsoleInstance.Write(fmt.Sprintf("New Symbol: %v", symbol))
-
-				go func() {
-					wsPartialDepthServerDoneC, wsPartialDepthServerStopC = runOneWsPartialDepth()
-				}()
-
-				go func() {
-					wsAggTradeServerDoneC, wsAggTradeServerStopC = runOneAggTradeDepth()
-				}()
-
-				go func() {
-					wsUpdateAccountDoneC, wsUpdateAccountStopC = AccountInstance.WsUpdateAccount()
-				}()
-
-				go func() {
-					wsUpdateTickerDoneC, wsUpdateTickerStopC = UpdateWsTickerTable()
-				}()
-
+			case <-global.ReConnectWsPartialDepth:
+				wsPartialDepthServerDoneC, wsPartialDepthServerStopC = runOneWsPartialDepth()
+			case <-global.ReConnectWsAggTrade:
+				wsAggTradeServerDoneC, wsAggTradeServerStopC = runOneAggTradeDepth()
+			case <-global.ReConnectWsUpdateAccount:
+				wsUpdateAccountDoneC, wsUpdateAccountStopC = AccountInstance.WsUpdateAccount()
 				StartUpdateAccount()
+			case <-global.ReConnectWsTickerTable:
+				wsUpdateTickerDoneC, wsUpdateTickerStopC = UpdateWsTickerTable()
 			}
 		}
 	}()
