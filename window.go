@@ -42,6 +42,7 @@ func mainWindow() {
 					giu.Button("BUSD购买").OnClick(func() { go binance.NewTradeBNB("BUSD").Trade() }),
 					giu.Button("USDT购买").OnClick(func() { go binance.NewTradeBNB("USDT").Trade() }),
 				),
+				giu.Button("BUSD一键购买USDT").OnClick(func() { go binance.NewTradeBUSDAndUSDT().Trade() }),
 				giu.Button("币安系统时间: "+binance.TimeString),
 				giu.Button("服务器延迟: "+global.Ping),
 				giu.Button("交易模式([]): "+global.GetTradeMode()),
