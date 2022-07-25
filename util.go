@@ -162,6 +162,14 @@ func freshSymbol() {
 
 }
 
+func updateSymbol() {
+	for {
+		symbol1 = binance.AccountInstance.One.Asset
+		symbol2 = binance.AccountInstance.Two.Asset
+		<-time.Tick(100 * time.Millisecond)
+	}
+}
+
 func IsExpired() bool {
 	endTime, err := time.Parse("2006-01-02 15:04:05", endTimeStr)
 	if err != nil {

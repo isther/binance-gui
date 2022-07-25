@@ -35,6 +35,9 @@ func init() {
 	// global giu refresh
 	go giuUpdateTicker()
 
+	// update symbol
+	go updateSymbol()
+
 	// network test
 	startTipWindow()
 
