@@ -130,8 +130,14 @@ func mainWindow() {
 								),
 								giu.TabBar().TabItems(giu.TabItem("下单配置").Layout(
 									giu.Column(
+										giu.Style().
+											SetColor(giu.StyleColorText, global.RED).
+											SetFontSize(20).
+											To(
+												giu.Label(fmt.Sprintf("当前交易对: %v", binance.AccountInstance.Symbol)),
+											),
 										giu.Row(
-											giu.Label("交易对: "),
+											giu.Label("输入切换交易对: "),
 											giu.InputText(&symbol1).Size(72.5),
 											giu.Label("/"),
 											giu.InputText(&symbol2).Size(72.5),
