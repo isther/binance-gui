@@ -60,63 +60,55 @@ func StartWebSocketStream() {
 		}
 	}()
 
-	wsPartialDepthServerDoneC, wsPartialDepthServerStopC = runOneWsPartialDepth()
-	wsAggTradeServerDoneC, wsAggTradeServerStopC = runOneAggTradeDepth()
-	wsUpdateAccountDoneC, wsUpdateAccountStopC = AccountInstance.WsUpdateAccount()
-	wsUpdateTickerDoneC, wsUpdateTickerStopC = UpdateWsTickerTable()
-	StartUpdateAccount()
+	go StartUpdateAccount()
+
 	go func() {
+		wsPartialDepthServerDoneC, wsPartialDepthServerStopC = runOneWsPartialDepth()
 		for {
-			select {
-			case symbol := <-global.FreshC:
-				console.ConsoleInstance.Write(fmt.Sprintf("New Symbol: %v", symbol))
-				// Clear Order
-				AccountInstance.Symbol = symbol
-				go func() {
-					wsPartialDepthServerStopC <- struct{}{}
-					<-wsPartialDepthServerDoneC
+			<-wsPartialDepthServerDoneC
+			console.ConsoleInstance.Write("Reload partial depth...")
+			wsPartialDepthServerDoneC, wsPartialDepthServerStopC = runOneWsPartialDepth()
+		}
+	}()
 
-					wsPartialDepthServerDoneC, wsPartialDepthServerStopC = runOneWsPartialDepth()
-				}()
+	go func() {
+		wsAggTradeServerDoneC, wsAggTradeServerStopC = runOneAggTradeDepth()
+		for {
+			<-wsAggTradeServerDoneC
+			console.ConsoleInstance.Write("Reload aggTrade...")
+			wsAggTradeServerDoneC, wsAggTradeServerStopC = runOneAggTradeDepth()
+		}
+	}()
 
-				go func() {
-					wsAggTradeServerStopC <- struct{}{}
-					<-wsAggTradeServerDoneC
+	go func() {
+		wsUpdateAccountDoneC, wsUpdateAccountStopC = AccountInstance.WsUpdateAccount()
+		for {
+			<-wsUpdateAccountDoneC
+			console.ConsoleInstance.Write("Reload updateAccount...")
+			wsUpdateAccountDoneC, wsUpdateAccountStopC = AccountInstance.WsUpdateAccount()
+		}
+	}()
 
-					wsAggTradeServerDoneC, wsAggTradeServerStopC = runOneAggTradeDepth()
-				}()
-
-				go func() {
-					wsUpdateAccountStopC <- struct{}{}
-					<-wsUpdateAccountDoneC
-
-					wsUpdateAccountDoneC, wsUpdateAccountStopC = AccountInstance.WsUpdateAccount()
-				}()
-
-				go func() {
-					wsUpdateTickerStopC <- struct{}{}
-					<-wsUpdateTickerDoneC
-
-					wsUpdateTickerDoneC, wsUpdateTickerStopC = UpdateWsTickerTable()
-				}()
-
-				StartUpdateAccount()
-			}
+	go func() {
+		wsUpdateTickerDoneC, wsUpdateTickerStopC = UpdateWsTickerTable()
+		for {
+			<-wsUpdateTickerDoneC
+			console.ConsoleInstance.Write("Reload ticker...")
+			wsUpdateTickerDoneC, wsUpdateTickerStopC = UpdateWsTickerTable()
 		}
 	}()
 
 	go func() {
 		for {
 			select {
-			case <-global.ReConnectWsPartialDepth:
-				wsPartialDepthServerDoneC, wsPartialDepthServerStopC = runOneWsPartialDepth()
-			case <-global.ReConnectWsAggTrade:
-				wsAggTradeServerDoneC, wsAggTradeServerStopC = runOneAggTradeDepth()
-			case <-global.ReConnectWsUpdateAccount:
-				wsUpdateAccountDoneC, wsUpdateAccountStopC = AccountInstance.WsUpdateAccount()
-				StartUpdateAccount()
-			case <-global.ReConnectWsTickerTable:
-				wsUpdateTickerDoneC, wsUpdateTickerStopC = UpdateWsTickerTable()
+			case symbol := <-global.FreshC:
+				go StartUpdateAccount()
+				console.ConsoleInstance.Write(fmt.Sprintf("New Symbol: %v", symbol))
+				AccountInstance.Symbol = symbol
+				wsPartialDepthServerStopC <- struct{}{}
+				wsAggTradeServerStopC <- struct{}{}
+				wsUpdateAccountStopC <- struct{}{}
+				wsUpdateTickerStopC <- struct{}{}
 			}
 		}
 	}()

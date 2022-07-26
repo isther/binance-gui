@@ -33,6 +33,9 @@ func GetWsPartialDepthSaleTable() []*giu.TableRowWidget {
 }
 
 func runOneWsPartialDepth() (chan struct{}, chan struct{}) {
+	console.ConsoleInstance.Write(fmt.Sprint("Run partial depth websocket..."))
+	cyclePing()
+
 	var (
 		err   error
 		doneC chan struct{}

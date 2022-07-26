@@ -65,3 +65,11 @@ func UpdateAverageAmount() {
 	global.AverageSymbol2Amount, _ = strconv.ParseFloat(averageSymbol2AmountStr, 64)
 	console.ConsoleInstance.Write(fmt.Sprintf("已分仓, 单仓购买数量: %v", global.AverageSymbol1Amount))
 }
+
+func cyclePing() {
+	for {
+		if err := GetClient().NewPingService().Do(context.Background()); err == nil {
+			break
+		}
+	}
+}

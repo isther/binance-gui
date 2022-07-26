@@ -25,6 +25,9 @@ func GetWsAggTradeTable() []*giu.TableRowWidget {
 }
 
 func runOneAggTradeDepth() (chan struct{}, chan struct{}) {
+	console.ConsoleInstance.Write(fmt.Sprint("Run aggTrade websocket..."))
+	cyclePing()
+
 	var (
 		err   error
 		doneC chan struct{}

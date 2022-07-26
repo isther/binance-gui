@@ -60,6 +60,9 @@ func GetTickerBUSDTable() []*giu.TableRowWidget {
 }
 
 func UpdateWsTickerTable() (chan struct{}, chan struct{}) {
+	console.ConsoleInstance.Write(fmt.Sprint("Run ticker websocket..."))
+	cyclePing()
+
 	httpGetTicker()
 	buildTickerTableC <- struct{}{}
 

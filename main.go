@@ -21,8 +21,8 @@ var (
 )
 
 func init() {
-	os.Setenv("http_proxy", conf.Conf.Proxy)
-	os.Setenv("https_proxy", conf.Conf.Proxy)
+	os.Setenv("HTTP_PROXY", conf.Conf.Proxy)
+	os.Setenv("HTTPS_PROXY", conf.Conf.Proxy)
 
 	if IsExpired() {
 		go func() {

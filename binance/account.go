@@ -142,6 +142,8 @@ func (account *Account) UpdateOrderList() {
 }
 
 func (account *Account) WsUpdateAccount() (chan struct{}, chan struct{}) {
+	console.ConsoleInstance.Write(fmt.Sprint("Run updateAccount websocket..."))
+	cyclePing()
 	var (
 		listenKey string
 
