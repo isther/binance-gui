@@ -3,6 +3,12 @@ package global
 import "image/color"
 
 var (
+	// Reconnect
+	ReconnectWsPartialDepthC chan struct{}
+	ReconnectWsAggTradeC     chan struct{}
+	ReconnectWsAccountC      chan struct{}
+	ReconnectWsTickerC       chan struct{}
+
 	// 筛选与预警
 	EarlyWarning = false
 

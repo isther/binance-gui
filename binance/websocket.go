@@ -60,8 +60,6 @@ func StartWebSocketStream() {
 		}
 	}()
 
-	go StartUpdateAccount()
-
 	go func() {
 		wsPartialDepthServerDoneC, wsPartialDepthServerStopC = runOneWsPartialDepth()
 		for {
@@ -82,6 +80,7 @@ func StartWebSocketStream() {
 
 	go func() {
 		wsUpdateAccountDoneC, wsUpdateAccountStopC = AccountInstance.WsUpdateAccount()
+		go StartUpdateAccount()
 		for {
 			<-wsUpdateAccountDoneC
 			console.ConsoleInstance.Write("Reload updateAccount...")
@@ -109,6 +108,15 @@ func StartWebSocketStream() {
 				wsAggTradeServerStopC <- struct{}{}
 				wsUpdateAccountStopC <- struct{}{}
 				wsUpdateTickerStopC <- struct{}{}
+			case <-global.ReconnectWsPartialDepthC:
+				wsPartialDepthServerDoneC, wsPartialDepthServerStopC = runOneWsPartialDepth()
+			case <-global.ReconnectWsAggTradeC:
+				wsAggTradeServerDoneC, wsAggTradeServerStopC = runOneAggTradeDepth()
+			case <-global.ReconnectWsAccountC:
+				wsUpdateAccountDoneC, wsUpdateAccountStopC = AccountInstance.WsUpdateAccount()
+				go StartUpdateAccount()
+			case <-global.ReconnectWsTickerC:
+				wsUpdateTickerDoneC, wsUpdateTickerStopC = UpdateWsTickerTable()
 			}
 		}
 	}()

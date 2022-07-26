@@ -46,6 +46,12 @@ func mainWindow() {
 				giu.Button("币安系统时间: "+binance.TimeString),
 				giu.Button("服务器延迟: "+global.Ping),
 				giu.Button("交易模式([]): "+global.GetTradeMode()),
+				giu.Menu("重连服务").Layout(
+					giu.Button("账户更新").OnClick(func() { global.ReconnectWsAccountC <- struct{}{} }),
+					giu.Button("成交明细").OnClick(func() { global.ReconnectWsAggTradeC <- struct{}{} }),
+					giu.Button("交易对").OnClick(func() { global.ReconnectWsTickerC <- struct{}{} }),
+					giu.Button("订单簿2").OnClick(func() { global.ReconnectWsPartialDepthC <- struct{}{} }),
+				),
 				giu.Style().
 					SetColor(giu.StyleColorBorder, global.HotKeyColor).
 					To(
