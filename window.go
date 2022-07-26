@@ -72,12 +72,6 @@ func mainWindow() {
 							),
 						),
 						giu.TabBar().TabItems(
-							giu.TabItem("预警").Layout(
-								giu.SplitLayout(giu.DirectionVertical, 125,
-									giu.Table().Freeze(0, 1).FastMode(true).Rows(binance.GetEarlyWaringTable1m()...),
-									giu.Table().Freeze(0, 1).FastMode(true).Rows(binance.GetEarlyWaringTable3m()...),
-								),
-							),
 							giu.TabItem("交易对").Layout(
 								giu.Child().Layout(
 									giu.TabBar().TabItems(
@@ -97,9 +91,19 @@ func mainWindow() {
 					),
 					giu.SplitLayout(giu.DirectionHorizontal, 300,
 						giu.SplitLayout(giu.DirectionVertical, 600,
-							giu.TabBar().TabItems(
-								giu.TabItem("成交明细").Layout(
-									giu.Table().Freeze(0, 1).FastMode(true).Rows(binance.GetWsAggTradeTable()...),
+							giu.SplitLayout(giu.DirectionVertical, 300,
+								giu.TabBar().TabItems(
+									giu.TabItem("成交明细").Layout(
+										giu.Table().Freeze(0, 1).FastMode(true).Rows(binance.GetWsAggTradeTable()...),
+									),
+								),
+								giu.TabBar().TabItems(
+									giu.TabItem("预警").Layout(
+										giu.SplitLayout(giu.DirectionVertical, 125,
+											giu.Table().Freeze(0, 1).FastMode(true).Rows(binance.GetEarlyWaringTable1m()...),
+											giu.Table().Freeze(0, 1).FastMode(true).Rows(binance.GetEarlyWaringTable3m()...),
+										),
+									),
 								),
 							),
 							giu.SplitLayout(giu.DirectionVertical, 125, //V
@@ -134,7 +138,7 @@ func mainWindow() {
 											SetColor(giu.StyleColorText, global.RED).
 											SetFontSize(20).
 											To(
-												giu.Label(fmt.Sprintf("当前交易对: %v", binance.AccountInstance.Symbol)),
+												giu.Label(fmt.Sprintf("Trading Pair: %v", binance.AccountInstance.Symbol)),
 											),
 										giu.Row(
 											giu.Label("输入切换交易对: "),
