@@ -12,11 +12,6 @@ var (
 	EarlyWarning3mAmplitude float32 = 3
 	EarlyWarning3mTurnOver  float32 = 40000
 
-	ReConnectWsPartialDepth  = make(chan struct{})
-	ReConnectWsAggTrade      = make(chan struct{})
-	ReConnectWsUpdateAccount = make(chan struct{})
-	ReConnectWsTickerTable   = make(chan struct{})
-
 	Ping  string
 	Debug = false
 

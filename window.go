@@ -53,12 +53,6 @@ func mainWindow() {
 							giu.Button("交易热键状态(空格): "+global.GetHotKeyStatus()).OnClick(func() { global.ReverseHotKeyStatus() }),
 						),
 					),
-				giu.Menu("WebSocket重连").Layout(
-					giu.Button("账户信息推送").OnClick(func() { global.ReConnectWsUpdateAccount <- struct{}{} }),
-					giu.Button("成交明细").OnClick(func() { global.ReConnectWsAggTrade <- struct{}{} }),
-					giu.Button("订单簿2").OnClick(func() { global.ReConnectWsPartialDepth <- struct{}{} }),
-					giu.Button("交易对更新").OnClick(func() { global.ReConnectWsTickerTable <- struct{}{} }),
-				),
 			),
 			giu.SplitLayout(giu.DirectionHorizontal, 1200, // H
 				giu.SplitLayout(giu.DirectionHorizontal, 300,
