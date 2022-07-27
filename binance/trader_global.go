@@ -204,7 +204,40 @@ func (g *GlobalTrader) cancelAllOrderAndSellAllPositions() {
 		g.createOrderOnFullWarehouse()
 		time.Sleep(200 * time.Millisecond)
 	}
+
+	go func() {
+		var (
+			priceStr    string
+			quantityStr string
+		)
+		price, _ := strconv.ParseFloat(AggTradePrice, 64)
+		price = price * float64(global.VolatilityRatiosF12)
+		priceStr = g.priceCorrection(price)
+
+		quantity, err := strconv.ParseFloat(g.getFree(), 64)
+		if err != nil {
+			console.ConsoleInstance.Write(fmt.Sprintf("Error: %v", err))
+		}
+		quantityStr = g.quantityCorrection(quantity)
+		g.createOrder(priceStr, quantityStr)
+	}()
+
 	ResetCostInstance()
+}
+
+func (g *GlobalTrader) getFree() string {
+	res, err := GetClient().NewGetAccountService().Do(context.Background())
+	if err != nil {
+		console.ConsoleInstance.Write(fmt.Sprintf("Error: %v", err))
+		return "0.0"
+	}
+
+	for _, balance := range res.Balances {
+		if balance.Asset == AccountInstance.One.Asset {
+			return balance.Free
+		}
+	}
+	return "0.0"
 }
 
 func (g *GlobalTrader) createOrder(price, quantity string) {

@@ -9,7 +9,7 @@ import (
 
 var (
 	CostInstance *Cost
-	CostColor    = global.RED
+	CostColor    = global.GREEN
 )
 
 type Cost struct {
@@ -60,7 +60,7 @@ func (c *Cost) UpdateAverageCode() string {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if c.Quantity == 0 {
-		CostColor = global.RED
+		CostColor = global.GREEN
 		return "0.0"
 	}
 
@@ -68,9 +68,9 @@ func (c *Cost) UpdateAverageCode() string {
 	averageCost, _ := strconv.ParseFloat(averageCostStr, 64)
 	aggTradePrice, _ := strconv.ParseFloat(AggTradePrice, 64)
 	if averageCost > aggTradePrice {
-		CostColor = global.GREEN
-	} else {
 		CostColor = global.RED
+	} else {
+		CostColor = global.GREEN
 	}
 	return averageCostStr
 }
