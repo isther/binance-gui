@@ -223,6 +223,7 @@ func (g *GlobalTrader) cancelAllOrderAndSellAllPositions() {
 	}()
 
 	ResetCostInstance()
+	UpdateAverageAmount()
 }
 
 func (g *GlobalTrader) getFree() string {
