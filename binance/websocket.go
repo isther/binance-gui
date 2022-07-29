@@ -85,6 +85,7 @@ func StartWebSocketStream() {
 			<-wsUpdateAccountDoneC
 			console.ConsoleInstance.Write("Reload updateAccount...")
 			wsUpdateAccountDoneC, wsUpdateAccountStopC = AccountInstance.WsUpdateAccount()
+			go StartUpdateAccount()
 		}
 	}()
 
@@ -104,19 +105,11 @@ func StartWebSocketStream() {
 				go StartUpdateAccount()
 				console.ConsoleInstance.Write(fmt.Sprintf("New Symbol: %v", symbol))
 				AccountInstance.Symbol = symbol
+
 				wsPartialDepthServerStopC <- struct{}{}
 				wsAggTradeServerStopC <- struct{}{}
 				wsUpdateAccountStopC <- struct{}{}
 				wsUpdateTickerStopC <- struct{}{}
-			case <-global.ReconnectWsPartialDepthC:
-				wsPartialDepthServerDoneC, wsPartialDepthServerStopC = runOneWsPartialDepth()
-			case <-global.ReconnectWsAggTradeC:
-				wsAggTradeServerDoneC, wsAggTradeServerStopC = runOneAggTradeDepth()
-			case <-global.ReconnectWsAccountC:
-				wsUpdateAccountDoneC, wsUpdateAccountStopC = AccountInstance.WsUpdateAccount()
-				go StartUpdateAccount()
-			case <-global.ReconnectWsTickerC:
-				wsUpdateTickerDoneC, wsUpdateTickerStopC = UpdateWsTickerTable()
 			}
 		}
 	}()

@@ -43,15 +43,14 @@ func mainWindow() {
 					giu.Button("USDT购买").OnClick(func() { go binance.NewTradeBNB("USDT").Trade() }),
 				),
 				giu.Button("BUSD一键购买USDT").OnClick(func() { go binance.NewTradeBUSDAndUSDT().Trade() }),
-				giu.Button("币安系统时间: "+binance.TimeString),
-				giu.Button("服务器延迟: "+global.Ping),
+				giu.Style().
+					SetColor(giu.StyleColorText, global.RED).
+					To(
+						giu.Column(
+							giu.Button("服务器延迟: "+global.Ping),
+						),
+					),
 				giu.Button("交易模式([]): "+global.GetTradeMode()),
-				giu.Menu("重连服务").Layout(
-					giu.Button("账户更新").OnClick(func() { global.ReconnectWsAccountC <- struct{}{} }),
-					giu.Button("成交明细").OnClick(func() { global.ReconnectWsAggTradeC <- struct{}{} }),
-					giu.Button("交易对").OnClick(func() { global.ReconnectWsTickerC <- struct{}{} }),
-					giu.Button("订单簿2").OnClick(func() { global.ReconnectWsPartialDepthC <- struct{}{} }),
-				),
 				giu.Style().
 					SetColor(giu.StyleColorBorder, global.HotKeyColor).
 					To(
@@ -59,6 +58,7 @@ func mainWindow() {
 							giu.Button("交易热键状态(空格): "+global.GetHotKeyStatus()).OnClick(func() { global.ReverseHotKeyStatus() }),
 						),
 					),
+				giu.Button("币安系统时间: "+binance.TimeString),
 			),
 			giu.SplitLayout(giu.DirectionHorizontal, 1200, // H
 				giu.SplitLayout(giu.DirectionHorizontal, 300,
