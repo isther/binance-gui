@@ -182,17 +182,17 @@ func buildTickerTable() ([]*giu.TableRowWidget, []*giu.TableRowWidget, []*giu.Ta
 		rowsBUSD []*giu.TableRowWidget
 
 		rowSelectable = giu.TableRow(
-			giu.Selectable("BaseAsset").Selected(false).OnDClick(func() {
+			giu.Selectable("BaseAsset").Selected(false).OnClick(func() {
 				sortTypeNow = sortByAssetDescend
 				openGlobalTickerC = true
 				updateTableC <- struct{}{}
 			}),
-			giu.Selectable("24hr TurnOver").Selected(false).OnDClick(func() {
+			giu.Selectable("24hr TurnOver").Selected(false).OnClick(func() {
 				sortTypeNow = sortByTurnOverDescend
 				openGlobalTickerC = true
 				updateTableC <- struct{}{}
 			}),
-			giu.Selectable("PriceChangePercent").Selected(false).OnDClick(func() {
+			giu.Selectable("PriceChangePercent").Selected(false).OnClick(func() {
 				sortTypeNow = sortByPercentageDescend
 				openGlobalTickerC = true
 				updateTableC <- struct{}{}
@@ -231,7 +231,7 @@ func buildTickerTable() ([]*giu.TableRowWidget, []*giu.TableRowWidget, []*giu.Ta
 			eColor = global.RED
 		}
 		rowsBTC = append(rowsBTC, giu.TableRow(
-			giu.Selectable(btc.asset).Selected(false).OnDClick(func() {
+			giu.Selectable(btc.asset).Selected(false).OnClick(func() {
 				AccountInstance.One.Asset = btc.asset
 				AccountInstance.Two.Asset = "BTC"
 				global.FreshC <- btc.asset + "BTC"
@@ -258,7 +258,7 @@ func buildTickerTable() ([]*giu.TableRowWidget, []*giu.TableRowWidget, []*giu.Ta
 			eColor = global.RED
 		}
 		rowsUSDT = append(rowsUSDT, giu.TableRow(
-			giu.Selectable(usdt.asset).Selected(false).OnDClick(func() {
+			giu.Selectable(usdt.asset).Selected(false).OnClick(func() {
 				AccountInstance.One.Asset = usdt.asset
 				AccountInstance.Two.Asset = "USDT"
 				global.FreshC <- usdt.asset + "USDT"
@@ -285,7 +285,7 @@ func buildTickerTable() ([]*giu.TableRowWidget, []*giu.TableRowWidget, []*giu.Ta
 			eColor = global.RED
 		}
 		rowsBUSD = append(rowsBUSD, giu.TableRow(
-			giu.Selectable(busd.asset).Selected(false).OnDClick(func() {
+			giu.Selectable(busd.asset).Selected(false).OnClick(func() {
 				AccountInstance.One.Asset = busd.asset
 				AccountInstance.Two.Asset = "BUSD"
 				global.FreshC <- busd.asset + "BUSD"
